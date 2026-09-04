@@ -13,6 +13,7 @@ function ExcelExport({ data, fileName }) {
         const blob = new Blob([excelBuffer], {
             type: "application/octet-stream",
         });
+        
         saveAs(blob, `${fileName}.xlsx`);
     };
     return (

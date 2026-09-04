@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Main from "../../components/Main/Main";
-import Cookies from "js-cookie";
-import repositori from "../../utils/repositories";
 import repoimages from "../../utils/repoimages";
 import ShowDataSiswa from "./modal/ShowDataSiswa";
 import DataTable from "react-data-table-component";
 import RefreshDataSiswaByKelas from "./components/RefreshDataSiswaByKelas";
 import DeleteDataSiswaHistory from "./components/DeleteDataSiswaHistory";
+import api from "../../utils/repositories";
 
 function KelasById() {
   const { nip, id } = useParams();
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
+
   const [kelas, setKelas] = useState([]);
   const [guru, setGuru] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -23,16 +21,14 @@ function KelasById() {
 
   const getDataKelasById = async () => {
     try {
-      let response = await fetch(`${repositori}kelas/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
-      // console.log("kelas hello", response.data);
-      setKelas(response.data);
-    } catch (error) {}
+      let response = await api
+        .get(`ruang-kelas/${nip}/${id}`)
+        .then((res) => res.data);
+      console.log("kelas hello", response.data);
+      setKelas(response.data[0]);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -41,34 +37,24 @@ function KelasById() {
 
   const dataGuru = async () => {
     try {
-      let response = await fetch(`${repositori}guru/${nip}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
+      let response = await api.get(`guru/${nip}`).then((res) => res.data);
       setGuru(response.data);
       // console.log("guru", nip);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getDataSiswaByKelas = async () => {
     try {
-      let response = await fetch(`${repositori}siswa/kelas/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      })
-        .then((res) => res.json())
-        .then((res) => res.data);
+      let response = await api.get(`siswa/kelas/${id}`).then((res) => res.data);
       // console.log("siswa hello", response);
       setSiswaByKelas(response);
       setFilterData(response);
       console.log("kelas", response);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -92,7 +78,10 @@ function KelasById() {
           name: "Action",
           selector: (row) => (
             <div className="flex flex-row gap-2">
-              <DeleteDataSiswaHistory id={row.id} getDataSiswaByKelas={getDataSiswaByKelas} />
+              <DeleteDataSiswaHistory
+                id={row.id}
+                getDataSiswaByKelas={getDataSiswaByKelas}
+              />
             </div>
           ),
           sortable: true,
@@ -120,7 +109,7 @@ function KelasById() {
         <div className="col-span-5 col-start-2 p-5 overflow-y-auto">
           <div className="flex justify-start py-4">
             <h4 className="font-bold text-xl text-slate-500">
-              Data Kelas {kelas.kelas}|{kelas.jurusan}
+              Data Kelas {kelas.nama_kelas}|{kelas.jurusan}
             </h4>
           </div>
 
@@ -133,7 +122,7 @@ function KelasById() {
                     Wali Kelas
                   </h1>
                   <p className="text-center text-sm font-semibold text-slate-500">
-                    {kelas.kelas}|{kelas.jurusan}
+                    {kelas.nama_kelas}|{kelas.jurusan}
                   </p>
                 </div>
                 <div className="flex flex-col text-center justify-center items-center">
@@ -145,7 +134,7 @@ function KelasById() {
                     />
                   </div>
                   <h1 className="text-base font-bold text-slate-500 text-center">
-                    {guru.nama}
+                    {guru.name}
                   </h1>
                   <h4 className="text-sm font-thin text-slate-500 text-center">
                     {guru.nip}
@@ -159,6 +148,38 @@ function KelasById() {
 
             <div className="w-full md:w-3/5">
               <div className="rounded-md shadow-md p-10 bg-white flex flex-col gap-5">
+                <div className="w-full flex flex-row justify-between items-center">
+                  <div className="flex flex-row w-1/8 relative">
+                    <input
+                      type="text"
+                      className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Enter search....."
+                    />
+                    <div className="absolute top-2 left-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="w-5 h-5 text-sky-500"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex justify-end pb-2">
+                    <RefreshDataSiswaByKelas
+                      getDataSiswaByKelas={getDataSiswaByKelas}
+                    />
+                  </div>
+                </div>
                 <DataTable
                   columns={columns}
                   data={filterData}
@@ -167,40 +188,6 @@ function KelasById() {
                   selectableRowsHighlight
                   highlightOnHover
                   subHeader
-                  subHeaderComponent={
-                    <div className="w-full flex flex-row justify-between items-center">
-                      <div className="flex flex-row w-1/8 relative">
-                        <input
-                          type="text"
-                          className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          placeholder="Enter search....."
-                        />
-                        <div className="absolute top-2 left-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="1.5"
-                            stroke="currentColor"
-                            className="w-5 h-5 text-sky-500"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="flex justify-end pb-2">
-                        <RefreshDataSiswaByKelas
-                          getDataSiswaByKelas={getDataSiswaByKelas}
-                        />
-                      </div>
-                    </div>
-                  }
                 />
               </div>
             </div>

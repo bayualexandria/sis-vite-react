@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import PopUpLogout from "../popup/PopUpLogout";
 import repo from "../../utils/repo";
 import api from "../../utils/repositories";
-import logo from "../../assets/images/logo-pendidikan.png"
+import logo from "../../assets/images/logo-pendidikan.png";
 
 function Sidebar() {
   const [show, setShow] = useState(false);
@@ -28,21 +28,17 @@ function Sidebar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-1/6 h-screen border-r drop-shadow-md bg-primary">
+    <div className="fixed top-0 left-0 w-1/6 h-screen border-r drop-shadow-md bg-primary border-none">
       <div className="px-3 py-8">
         <div className="flex justify-center">
           <div className="w-20 h-20 flex justify-center items-center rounded-full bg-white p-2 shadow-lg">
-            <img
-              src={logo}
-              alt="logo"
-              className="w-full"
-            />
+            <img src={logo} alt="logo" className="w-full" />
           </div>
         </div>
         <ul className="flex flex-col justify-center mt-5 text-sm text-white md:px-1 gap-y-4 md:gap-x-4">
           <li className="flex justify-center w-full md:justify-between">
             <Link
-              to="/"
+              to="/home"
               className="flex items-center gap-3 hover:text-slate-300"
             >
               <svg

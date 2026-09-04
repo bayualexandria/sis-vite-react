@@ -20,7 +20,7 @@ function Siswa() {
   const dataUser = async () => {
     try {
       const response = await api
-        .get(`/siswa/`, {
+        .get(`siswa/`, {
           withCredentials: true,
         })
         .then((res) => res.data);
@@ -62,7 +62,7 @@ function Siswa() {
           sortable: true,
         },
         {
-          name: "",
+          name: "Action",
           selector: (row) => (
             <div className="flex flex-row gap-x-3">
               <Link to={`/siswa/${row.nis}`}>
@@ -117,7 +117,46 @@ function Siswa() {
           </div>
           <div className="flex flex-col gap-y-10">
             <div className="grid gap-5 grid-col-1 ">
-              <div className="p-5 transition duration-300 bg-white rounded-lg shadow-md ">
+              <div className="w-full">
+                {/* Toolbar */}
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Search */}
+                  <div className="relative w-full sm:w-80">
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Cari data guru..."
+                      className="w-full rounded-md border border-sky-500 bg-white py-2 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-200"
+                    />
+
+                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="h-5 w-5 text-sky-500"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Tombol */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <AddDataSiswa />
+                    <ExcelExport data={user} fileName="Data Siswa" />
+                    <ShowDataTrashSiswa />
+                  </div>
+                </div>
+              </div>
+              <div className="p-1 transition duration-300 bg-white rounded-lg shadow-md ">
                 <DataTable
                   data={filter}
                   columns={columns}
@@ -125,43 +164,6 @@ function Siswa() {
                   pagination
                   selectableRowsHighlight
                   highlightOnHover
-                  subHeader
-                  subHeaderComponent={
-                    <div className="w-full flex flex-row justify-between items-center">
-                      <div className="flex flex-row w-1/8 relative">
-                        <form>
-                          <input
-                            type="text"
-                            className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
-                            value={search || ""}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Enter search....."
-                          />
-                          <div className="absolute top-2 left-2">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth="1.5"
-                              stroke="currentColor"
-                              className="w-5 h-5 text-sky-500"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                              />
-                            </svg>
-                          </div>
-                        </form>
-                      </div>
-                      <div className="flex flex-row justify-center items-center gap-x-5">
-                        <AddDataSiswa />
-                        <ExcelExport data={user} fileName="Data Siswa" />
-                        <ShowDataTrashSiswa />
-                      </div>
-                    </div>
-                  }
                 />
               </div>
             </div>

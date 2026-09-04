@@ -3,8 +3,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import repositori from "../../utils/repositories";
-import Cookies from "js-cookie";
+import api from "../../utils/repositories";
 
 const style = {
   position: "absolute",
@@ -42,8 +41,7 @@ function AddDataKelas(props) {
   const [kelas, setKelas] = useState([]);
   const [guru, setGuru] = useState([]);
   const [semester, setSemester] = useState([]);
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
+
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -51,13 +49,7 @@ function AddDataKelas(props) {
 
   const getDataKelas = async () => {
     try {
-      let response = await fetch(`${repositori}kelas/data-kelas`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
+      let response = await api.get(`kelas/`).then((res) => res.data);
       setKelas(response.data);
     } catch (e) {
       if (e.message === "Failed to fetch") {
@@ -72,13 +64,7 @@ function AddDataKelas(props) {
 
   const getDataGuru = async () => {
     try {
-      let response = await fetch(`${repositori}guru/status-wali-kelas`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
+      let response = await api.get(`guru/`).then((res) => res.data);
       setGuru(response.data);
     } catch (e) {
       if (e.message === "Failed to fetch") {
@@ -93,13 +79,7 @@ function AddDataKelas(props) {
 
   const getDataSemester = async () => {
     try {
-      let response = await fetch(`${repositori}semester`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
+      let response = await api.get(`semester`).then((res) => res.data);
       setSemester(response.data);
     } catch (e) {
       if (e.message === "Failed to fetch") {
@@ -127,14 +107,7 @@ function AddDataKelas(props) {
     setloading(true);
     e.preventDefault();
     try {
-      let response = await fetch(`${repositori}kelas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-        body: JSON.stringify(dataKelas),
-      }).then((res) => res.json());
+      let response = await api.post(`kelas`, dataKelas).then((res) => res.data);
       // console.log(response);
       if (response.status === 403) {
         setTimeout(() => {
@@ -142,7 +115,7 @@ function AddDataKelas(props) {
           setError(response.message);
         }, 1000);
       }
-     
+
       if (response.status === 200) {
         setTimeout(async () => {
           setloading(false);
@@ -273,7 +246,7 @@ function AddDataKelas(props) {
                     {guru.map((data) => {
                       return (
                         <option value={data.id} key={data.id}>
-                          {data.nama}
+                          {data.name}
                         </option>
                       );
                     })}

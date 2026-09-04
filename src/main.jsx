@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    {/* Tambahkan basename pada folder project ketika mau di build contoh "basename="/sis"" pada <BrowserRoute> */}
     <BrowserRouter>
       <App />
     </BrowserRouter>

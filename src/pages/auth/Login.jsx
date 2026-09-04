@@ -4,9 +4,7 @@ import { Link, Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import LoginViaSocialMedia from "./LoginViaSocialMedia";
-
 import api from "../../utils/repositories";
-import ReCAPTCHA from "react-google-recaptcha";
 
 const templateModal = withReactContent(Swal).mixin({
   customClass: {
@@ -55,10 +53,8 @@ function Login() {
         )
         .then((res) => res.data);
       setLoading(false);
-
+      console.log(response);
       if (response.status === 200) {
-        var date = new Date();
-        date.setTime(date.getTime() + 60 * 60 * 1000);
         localStorage.setItem("username", JSON.stringify(username));
         localStorage.setItem(
           "id_user",
@@ -204,7 +200,6 @@ function Login() {
                 )}
               </div>
             </div>
-            <ReCAPTCHA sitekey="6Ld1Kz8tAAAAAPwlu1XZVPrc0MDG0L8mwTupRgf8" />
             <button
               type="submit"
               className="rounded-full outline-none p-2 border border-sky-500 bg-sky-500 text-base text-white font-bold"

@@ -25,7 +25,7 @@ function Guru() {
     try {
       setPending(true);
 
-      const response = await api.get("/guru/");
+      const response = await api.get("guru/");
       const data = response?.data?.data ?? [];
 
       console.log("Data guru:", data);

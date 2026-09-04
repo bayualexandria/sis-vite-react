@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import Main from "../components/Main/Main";
 import { Link } from "react-router-dom";
 import api from "../utils/repositories";
-import Semester from "./semester/Semester";
+
 
 function Home() {
   const [guru, setGuru] = useState("");
@@ -195,7 +195,7 @@ function Home() {
                 </div>
               </Link>
             </div>
-            <Semester />
+
           </div>
         </div>
       </div>

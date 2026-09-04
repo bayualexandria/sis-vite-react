@@ -1,4 +1,4 @@
-import { useState, useEffect,useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, Navigate } from "react-router-dom";
 
 import Swal from "sweetalert2";
@@ -40,47 +40,51 @@ function Header() {
   const [user, setUser] = useState(localStorage.getItem("username"));
   const [dataUser, setDataUser] = useState([]);
 
- const showUser = useCallback(async () => {
-   const dataUserStorage = localStorage.getItem("username");
+  const showUser = useCallback(async () => {
+    const dataUserStorage = localStorage.getItem("username");
 
-   if (!dataUserStorage) {
-     return;
-   }
+    if (!dataUserStorage) {
+      return;
+    }
 
-   let username;
+    let username;
 
-   try {
-     username = JSON.parse(dataUserStorage);
-   } catch {
-     username = dataUserStorage;
-   }
+    try {
+      username = JSON.parse(dataUserStorage);
+    } catch {
+      username = dataUserStorage;
+    }
 
-   try {
-     const response = await api.get(`/user/${username}/guru`);
-     const data = response?.data?.data;
+    try {
+      const response = await api.get(`user/${username}/guru`);
+      const data = response?.data?.data;
 
-     console.log("header guru", data);
+      setDataUser(data);
+    } catch (error) {
+      if (
+        error?.message === "Failed to fetch" ||
+        error?.code === "ERR_NETWORK" ||
+        error?.response?.status === 401
+      ) {
+        templateModalNotif.fire({
+          icon: "error",
+          title:
+            "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
+        });
+        localStorage.removeItem("username");
+        localStorage.removeItem("id_user");
+        localStorage.removeItem("is_logged_in");
+        await api.delete(`access-token/${username}`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+      }
+    }
+  }, []);
 
-     setDataUser(data);
-   } catch (error) {
-     console.log("Header", error);
-
-     if (
-       error?.message === "Failed to fetch" ||
-       error?.code === "ERR_NETWORK"
-     ) {
-       templateModalNotif.fire({
-         icon: "error",
-         title:
-           "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
-       });
-     }
-   }
- }, []);
-
- useEffect(() => {
-   showUser();
- }, [showUser]);
+  useEffect(() => {
+    showUser();
+  }, [showUser]);
 
   const popUpLogoutButton = async () => {
     await templateModal

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from "react-modal";
-import Cookies from "js-cookie";
+
 import DataTable from "react-data-table-component";
-import repositori from "../../../utils/repositories";
+
 import AddDataSiswaHistory from "./AddDataSiswaHistory";
 import RefreshDataSiswa from "./RefreshDataSiswa";
+import api from "../../../utils/repositories";
 
 const customStyles = {
   content: {
@@ -22,8 +23,6 @@ function ShowDataSiswa({ kelasId }) {
   const [filterData, setFilterData] = useState([]);
   const [pendingData, setPending] = useState(true);
   const [search, setSearch] = useState("");
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
   const [siswa, setSiswa] = useState([]);
 
   function openModal() {
@@ -35,19 +34,13 @@ function ShowDataSiswa({ kelasId }) {
 
   const getDataSiswa = async () => {
     try {
-      let response = await fetch(`${repositori}siswa/search`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      })
-        .then((res) => res.json())
-        .then((res) => res.data);
+      let response = await api.get(`siswa/search`).then((res) => res.data);
       // console.log("siswa hello", response);
       setSiswa(response);
       setFilterData(response);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -56,7 +49,7 @@ function ShowDataSiswa({ kelasId }) {
       setColumns([
         {
           name: "Nama Lengkap",
-          selector: (row) => row.nama,
+          selector: (row) => row.name,
           sortable: true,
         },
         {
@@ -82,7 +75,6 @@ function ShowDataSiswa({ kelasId }) {
               kelasId={kelasId}
               siswaId={row.id}
               getDataSiswa={getDataSiswa}
-             
             />
           ),
           sortable: true,
@@ -157,7 +149,34 @@ function ShowDataSiswa({ kelasId }) {
               </svg>
             </button>
           </div>
-
+          <div className="w-full flex flex-row justify-between items-center">
+            <div className="flex flex-row w-1/8 relative">
+              <input
+                type="text"
+                className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Enter search....."
+              />
+              <div className="absolute top-2 left-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-5 h-5 text-sky-500"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <RefreshDataSiswa getDataSiswa={getDataSiswa} />
+          </div>
           <DataTable
             columns={columns}
             data={filterData}
@@ -166,36 +185,6 @@ function ShowDataSiswa({ kelasId }) {
             selectableRowsHighlight
             highlightOnHover
             subHeader
-            subHeaderComponent={
-              <div className="w-full flex flex-row justify-between items-center">
-                <div className="flex flex-row w-1/8 relative">
-                  <input
-                    type="text"
-                    className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Enter search....."
-                  />
-                  <div className="absolute top-2 left-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-5 h-5 text-sky-500"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <RefreshDataSiswa getDataSiswa={getDataSiswa} />
-              </div>
-            }
           />
         </div>
       </Modal>

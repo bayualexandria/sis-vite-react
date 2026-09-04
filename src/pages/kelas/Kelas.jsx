@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Main from "../../components/Main/Main";
-import repositori from "../../utils/repositories";
-import Cookies from "js-cookie";
 
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
@@ -10,6 +8,7 @@ import UpdateKelasById from "./UpdateKelasById";
 import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import AddDataKelas from "./AddDataKelas";
+import api from "../../utils/repositories";
 
 const templateModalSuccess = withReactContent(Swal).mixin({
   customClass: {
@@ -32,8 +31,8 @@ const templateModalSuccess = withReactContent(Swal).mixin({
 
 function Kelas() {
   const [kelasHistory, setKelasHistory] = useState([]);
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
+  const token = localStorage.getItem("username");
+  const username = token.replace(/"/g, "");
   const [user, setUser] = useState([]);
   const [datakelasGuru, setDataKelasGuru] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -45,19 +44,12 @@ function Kelas() {
 
   const [loadData, setLoadData] = useState(false);
 
-
   // Get data kelas
   const getKelasHistory = async () => {
     setLoadData(true);
     try {
-      let response = await fetch(`${repositori}kelas`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
-      // console.log(response);
+      let response = await api.get(`ruang-kelas/`).then((res) => res.data);
+      console.log("kelas", response);
       if (response.status == 200) {
         setLoadData(false);
         setKelasHistory(response.data);
@@ -65,6 +57,7 @@ function Kelas() {
         console.log(response.data);
       }
     } catch (e) {
+      console.log(e.response.data);
       if (e.message === "Failed to fetch") {
         return templateModalSuccess.fire({
           icon: "error",
@@ -77,13 +70,9 @@ function Kelas() {
 
   const getDataKelasByGuru = async () => {
     try {
-      let response = await fetch(`${repositori}kelas/guru/${token[1]}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-        method: "GET",
-      }).then((res) => res.json());
+      let response = await api
+        .get(`ruang-kelas/${username}`)
+        .then((res) => res.data);
       setDataKelasGuru(response.data);
       // console.log("kelas guru", response);
     } catch (e) {
@@ -99,15 +88,12 @@ function Kelas() {
 
   const getUserById = async () => {
     try {
-      let response = await fetch(`${repositori}user/${token[1]}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-        method: "GET",
-      }).then((res) => res.json());
+      let response = await api
+        .get(`user/${username}/guru`)
+        .then((res) => res.data);
+      console.log("user", response);
       setUser(response.data);
-      // console.log("first", response.data);
+      // console.log("first", response);
     } catch (e) {
       if (e.message === "Failed to fetch") {
         return templateModalSuccess.fire({
@@ -127,7 +113,7 @@ function Kelas() {
           name: "Kelas",
           selector: (row) => (
             <p>
-              {row.kelas} | {row.jurusan}
+              {row.nama_kelas} | {row.jurusan}
             </p>
           ),
           sortable: true,
@@ -135,7 +121,7 @@ function Kelas() {
         {
           name: "#      ",
           selector: (row) => (
-            <Link to={`${row.no_induk_guru}/${row.id}`} key={row.id}>
+            <Link to={`${row.nip}/${row.id}`} key={row.id}>
               <div>
                 {row.jurusan === "Teknik Komputer & Jaringan" ? (
                   <svg
@@ -221,7 +207,7 @@ function Kelas() {
                   d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                 />
               </svg>
-              {row.wali_kelas}
+              {row.name}
             </div>
           ),
           sortable: true,
@@ -230,7 +216,7 @@ function Kelas() {
           name: "Semester",
           selector: (row) => (
             <p>
-              {row.semester == "I" ? "Ganjil" : "Genap"} - {row.tahun_pelajaran}
+              {row.semester == "I" ? "Ganjil" : "Genap"} - {row.tahun_ajaran}
             </p>
           ),
           sortable: true,
@@ -258,10 +244,10 @@ function Kelas() {
     const result = kelasHistory.filter((item) => {
       return (
         item.jurusan.toLowerCase().match(search.toLowerCase()) ||
-        item.kelas.toLowerCase().match(search.toLowerCase()) ||
+        item.nama_kelas.toLowerCase().match(search.toLowerCase()) ||
         item.semester.toLowerCase().match(search.toLowerCase()) ||
-        item.tahun_pelajaran.toLowerCase().match(search.toLowerCase()) ||
-        item.wali_kelas.toLowerCase().match(search.toLowerCase())
+        item.tahun_ajaran.toLowerCase().match(search.toLowerCase()) ||
+        item.name.toLowerCase().match(search.toLowerCase())
       );
     });
     setFilter(result);
@@ -312,7 +298,7 @@ function Kelas() {
                         className="w-full rounded-md shadow-md bg-white p-3"
                       >
                         <div className="flex flex-col gap-y-1">
-                          <Link to={`${k.no_induk_guru}/${k.id}`} key={k.id}>
+                          <Link to={`${k.nip}/${k.id}`} key={k.id}>
                             <div className="flex flex-row w-full gap-x-1">
                               <div className=" w-1/2">
                                 {k.jurusan === "Teknik Komputer & Jaringan" ? (
@@ -385,7 +371,7 @@ function Kelas() {
                                   {k.jurusan}
                                 </p>
                                 <p className="font-bold text-[11px] text-slate-500">
-                                  {k.semester}/{k.tahun_pelajaran}
+                                  {k.semester}/{k.tahun_ajaran}
                                 </p>
                               </div>
                             </div>
@@ -423,6 +409,44 @@ function Kelas() {
                 })
               ) : (
                 <div className="p-5 transition duration-300 bg-white rounded-lg shadow-md ">
+                  <div className="w-full flex flex-row justify-between items-center">
+                    <div className="flex flex-row w-1/8 relative">
+                      <form>
+                        <input
+                          type="text"
+                          className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
+                          value={search || ""}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder="Enter search....."
+                        />
+                        <div className="absolute top-2 left-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="w-5 h-5 text-sky-500"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                            />
+                          </svg>
+                        </div>
+                      </form>
+                    </div>
+                    <div className="flex flex-row justify-center items-center gap-x-5">
+                      {user.status_id == 1 ? (
+                        <div className="flex justify-end pb-2">
+                          <AddDataKelas getKelasHistory={getKelasHistory} />
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </div>
                   <DataTable
                     data={filter}
                     columns={columns}
@@ -431,49 +455,6 @@ function Kelas() {
                     selectableRowsHighlight
                     highlightOnHover
                     subHeader
-                    actions={
-                      user.status_id == 1 ? (
-                        <div className="flex justify-end pb-2">
-                          <AddDataKelas getKelasHistory={getKelasHistory} />
-                        </div>
-                      ) : (
-                        ""
-                      )
-                    }
-                    subHeaderComponent={
-                      <div className="w-full flex flex-row justify-between items-center">
-                        <div className="flex flex-row w-1/8 relative">
-                          <form>
-                            <input
-                              type="text"
-                              className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
-                              value={search || ""}
-                              onChange={(e) => setSearch(e.target.value)}
-                              placeholder="Enter search....."
-                            />
-                            <div className="absolute top-2 left-2">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="w-5 h-5 text-sky-500"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                                />
-                              </svg>
-                            </div>
-                          </form>
-                        </div>
-                        <div className="flex flex-row justify-center items-center gap-x-5">
-                          {}
-                        </div>
-                      </div>
-                    }
                   />
                 </div>
               )}

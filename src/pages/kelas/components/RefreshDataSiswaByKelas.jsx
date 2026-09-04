@@ -30,7 +30,7 @@ function RefreshDataSiswaByKelas({ getDataSiswaByKelas }) {
         />
       </svg>
       {loading && (
-        <span className="absolute top-0 left-0 w-full h-full bg-white opacity-50 rounded-full flex justify-center items-center">
+        <span className="absolute top-0 left-0 w-full h-full bg-white opacity-50 flex justify-center items-center">
           <span className="text-xs text-sky-500">Loading...</span>
         </span>
       )}

@@ -4,8 +4,8 @@ import Header from "../header/Header";
 
 function Main({ children }) {
   return (
-    <div className="scroll-smooth ">
-      <div className="relative w-full border-b shadow-md">
+    <div className="scroll-smooth">
+      <div className="relative w-full border-b shadow-md border-none">
         <Header />
         <Sidebar />
       </div>

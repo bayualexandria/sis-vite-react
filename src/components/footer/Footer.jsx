@@ -2,7 +2,7 @@
 
 function Footer() {
   return (
-    <footer className="flex flex-col justify-center md:flex-row">
+    <footer className="flex flex-col justify-center md:flex-row ">
       <div className="py-5 text-sm font-bold text-slate-500">
         <p className="flex flex-col items-center justify-center pl-16 md:gap-2 md:flex-row">
           cre@ted by b@yu4lex@ndr!4 - liked

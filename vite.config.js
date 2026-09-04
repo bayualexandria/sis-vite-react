@@ -10,4 +10,12 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
+  // Tambahkan base pada folder project ketika mau di build contoh "base="/sis/"
+  base: "/",
+  server: {
+    host: true,
+    allowedHosts: [
+      "localhhost",
+    ],
+  },
 });

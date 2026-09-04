@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from "react-modal";
 import Cookies from "js-cookie";
-import axios from "axios";
 import repositori from "../../../utils/repositories";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
@@ -260,94 +259,95 @@ function ShowDataTrashSiswa() {
               </svg>
             </button>
           </div>
-          <DataTable
-            columns={columns}
-            data={filterTrash}
-            progressPending={pendingTrash}
-            pagination
-            selectableRowsHighlight
-            highlightOnHover
-            subHeader
-            subHeaderComponent={
-              <div className="w-full flex flex-row justify-between items-center">
-                <div className="flex flex-row w-1/8 relative">
-                  <input
-                    type="text"
-                    className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
-                    value={searchTrash}
-                    onChange={(e) => setSearchTrash(e.target.value)}
-                    placeholder="Enter searchTrash....."
-                  />
-                  <div className="absolute top-2 left-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="w-5 h-5 text-sky-500"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex flex-row">
-                  {dataTrash == "" ? (
-                    ""
-                  ) : (
-                    <div className="flex flex-row gap-x-2">
-                      <div
-                        className="rounded-md p-1 flex flex-row justify-center items-center font-bold border border-sky-500 text-sm gap-x-1 hover:bg-white hover:text-sky-500 cursor-pointer bg-sky-500 text-white transition duration-200"
-                        onClick={restoreDataAll}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                          />
-                        </svg>
-
-                        <p>Restore all</p>
-                      </div>
-                      <div
-                        className="rounded-md p-1 flex flex-row justify-center items-center font-bold border border-rose-500 text-sm gap-x-1 hover:bg-white hover:text-rose-500 cursor-pointer bg-rose-500 text-white transition duration-200"
-                        onClick={deletePermanen}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                          />
-                        </svg>
-
-                        <p>Delete permanent all</p>
-                      </div>
-                    </div>
-                  )}
+          <div className="w-full">
+            {/* Toolbar */}
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-row w-1/8 relative">
+                <input
+                  type="text"
+                  className="rounded-md pr-2 pl-8 py-1 border border-sky-500 outline-none"
+                  value={searchTrash}
+                  onChange={(e) => setSearchTrash(e.target.value)}
+                  placeholder="Enter searchTrash....."
+                />
+                <div className="absolute top-2 left-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="w-5 h-5 text-sky-500"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                    />
+                  </svg>
                 </div>
               </div>
-            }
-          />
+              <div className="flex flex-row">
+                {dataTrash == "" ? (
+                  ""
+                ) : (
+                  <div className="flex flex-row gap-x-2">
+                    <div
+                      className="rounded-md p-1 flex flex-row justify-center items-center font-bold border border-sky-500 text-sm gap-x-1 hover:bg-white hover:text-sky-500 cursor-pointer bg-sky-500 text-white transition duration-200"
+                      onClick={restoreDataAll}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="size-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+                        />
+                      </svg>
+
+                      <p>Restore all</p>
+                    </div>
+                    <div
+                      className="rounded-md p-1 flex flex-row justify-center items-center font-bold border border-rose-500 text-sm gap-x-1 hover:bg-white hover:text-rose-500 cursor-pointer bg-rose-500 text-white transition duration-200"
+                      onClick={deletePermanen}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="size-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                        />
+                      </svg>
+
+                      <p>Delete permanent all</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DataTable
+              columns={columns}
+              data={filterTrash}
+              progressPending={pendingTrash}
+              pagination
+              selectableRowsHighlight
+              highlightOnHover
+              subHeader
+            />
+          </div>
         </div>
       </Modal>
     </>

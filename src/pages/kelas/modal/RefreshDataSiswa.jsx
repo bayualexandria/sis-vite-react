@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function RefreshDataSiswa({ getDataSiswa }) {
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ function RefreshDataSiswa({ getDataSiswa }) {
         />
       </svg>
       {loading && (
-        <span className="absolute top-0 left-0 w-full h-full bg-white opacity-50 rounded-full flex justify-center items-center">
+        <span className="absolute top-0 left-0 w-full h-full bg-white opacity-50 flex justify-center items-center">
           <span className="text-xs text-sky-500">Loading...</span>
         </span>
       )}

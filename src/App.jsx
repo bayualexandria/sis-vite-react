@@ -78,7 +78,9 @@ function App() {
         path="/guru"
         element={
           <PrivateRoute>
-            <Guru />
+            <RoleRoute role="1">
+              <Guru />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -87,7 +89,9 @@ function App() {
         path="/guru/:nip"
         element={
           <PrivateRoute>
-            <UpdateDataGuru />
+            <RoleRoute role="1">
+              <UpdateDataGuru />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -96,7 +100,9 @@ function App() {
         path="/siswa"
         element={
           <PrivateRoute>
-            <Siswa />
+            <RoleRoute role="1">
+              <Siswa />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -105,7 +111,9 @@ function App() {
         path="/siswa/:nis"
         element={
           <PrivateRoute>
-            <GetById />
+            <RoleRoute role="1">
+              <GetById />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -119,6 +127,7 @@ function App() {
         }
       />
       {/* Kelas */}
+
       <Route
         path="/kelas"
         element={
@@ -163,6 +172,15 @@ function UnAthenticated({ children }) {
   const isLoggedIn = localStorage.getItem("is_logged_in");
 
   if (isLoggedIn !== "true") {
+    return children;
+  }
+  return <Navigate to="/home" replace={true} />;
+}
+// buat function user role Admin, Guru, Siswa dan menambahkannya ke Route
+// Jika role nya lebih dari 1
+function RoleRoute({ role, children }) {
+  const userRole = localStorage.getItem("id_user");
+  if (userRole === role) {
     return children;
   }
   return <Navigate to="/home" replace={true} />;
