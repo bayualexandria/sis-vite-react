@@ -1,6 +1,6 @@
 # FrontEnd Sistem Informasi Siswa
 
-Sistem informasi siswa ini berbasis Vite-React untuk keperluan user interface, untuk backend nya saya menggunakan golang untuk REST API nya [link flutter](https://github.com/bayualexandria/rest-api-golang-sis):
+Sistem informasi siswa ini berbasis Vite-React untuk keperluan user interface, untuk backend nya saya menggunakan golang untuk REST API nya [link golang](https://github.com/bayualexandria/rest-api-golang-sis):
 
 Jalankan perintah ini untuk mendownload pacakge pada node_modules
 
