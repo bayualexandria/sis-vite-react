@@ -137,8 +137,8 @@ function AddDataSiswa(props) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <div className="w-full overflow-hidden overflow-y-auto border rounded-lg boder-slate-300 ">
-            <h1 className="font-bold text-xl p-3 text-slate-700">
+          <div className="w-full overflow-hidden overflow-y-auto rounded-lg boder-slate-300 ">
+            <h1 className="font-bold text-xl p-1 text-slate-700">
               Add Data Guru
             </h1>
             <hr className="text-slate-500" />

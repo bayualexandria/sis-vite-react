@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PopUpLogout from "../popup/PopUpLogout";
-import repo from "../../utils/repo";
 import api from "../../utils/repositories";
 import logo from "../../assets/images/logo-pendidikan.png";
 
@@ -16,7 +15,9 @@ function Sidebar() {
         .get(`user/${username}/guru`)
         .then((res) => res.data.data);
       setDataUser(response["status_id"]);
-    } catch (error) {}
+    } catch (error) {
+      return error;
+    }
   };
 
   useEffect(() => {
@@ -31,8 +32,8 @@ function Sidebar() {
     <div className="fixed top-0 left-0 w-1/6 h-screen border-r drop-shadow-md bg-primary border-none">
       <div className="px-3 py-8">
         <div className="flex justify-center">
-          <div className="w-20 h-20 flex justify-center items-center rounded-full bg-white p-2 shadow-lg">
-            <img src={logo} alt="logo" className="w-full" />
+          <div className="md:w-20 md:h-20 sm:h-10 sm:w-10 h-5 w-5 flex justify-center items-center rounded-full bg-white md:p-2 sm:p-1 shadow-lg">
+            <img src={logo} alt="logo" className=" w-full" />
           </div>
         </div>
         <ul className="flex flex-col justify-center mt-5 text-sm text-white md:px-1 gap-y-4 md:gap-x-4">

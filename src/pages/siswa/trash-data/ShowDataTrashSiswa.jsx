@@ -340,7 +340,7 @@ function ShowDataTrashSiswa() {
             </div>
             <DataTable
               columns={columns}
-              data={filterTrash}
+              data={filterTrash ?? []}
               progressPending={pendingTrash}
               pagination
               selectableRowsHighlight

@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import withReactContent from "sweetalert2-react-content";
 import repositori from "../../../utils/repositories";
 
-function RestoreDataSiswaById({ nis }) {
+function RestoreDataGuruById({ nis }) {
     const restoreDataSiswaById = async () => {
         const templateModalSuccess = withReactContent(Swal).mixin({
             customClass: {
@@ -92,4 +92,4 @@ function RestoreDataSiswaById({ nis }) {
     );
 }
 
-export default RestoreDataSiswaById;
+export default RestoreDataGuruById;

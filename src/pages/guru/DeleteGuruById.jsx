@@ -1,8 +1,6 @@
-import React from "react";
 import Swal from "sweetalert2";
-import Cookies from "js-cookie";
 import withReactContent from "sweetalert2-react-content";
-import repositori from "../../utils/repositories";
+import api from "../../utils/repositories";
 
 function DeleteGuruById({ username }) {
   const popUpDeleteGuruById = async () => {
@@ -35,43 +33,34 @@ function DeleteGuruById({ username }) {
       buttonsStyling: false,
     });
 
-        await templateModal
-            .fire({
-                title: "Delete data guru",
-                text: "Apakah anda ingin menghapus data ini!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Ya",
-                cancelButtonText: "Tidak",
-                reverseButtons: true,
-            })
-            .then(async (result) => {
-                try {
-                    if (result.isConfirmed) {
-                        await templateModalSuccess.fire({
-                            icon: "success",
-                            title: "Data berhasil dihapus",
-                        });
-                        setTimeout(async () => {
-                            const data = Cookies.get("authentication");
-                            const token = data.split(",");
-                            console.log(token[0]);
-                            await fetch(`${repositori}guru/${username}`, {
-                                method: "DELETE",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: "Bearer " + token[0],
-                                },
-                            });
-                            return (window.location.href = "/guru");
-                        }, 500);
-                    }
-                } catch (e) {
-                    console.log(e.message);
-                }
-                return true;
+    await templateModal
+      .fire({
+        title: "Delete data guru",
+        text: "Apakah anda ingin menghapus data ini!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya",
+        cancelButtonText: "Tidak",
+        reverseButtons: true,
+      })
+      .then(async (result) => {
+        try {
+          if (result.isConfirmed) {
+            await templateModalSuccess.fire({
+              icon: "success",
+              title: "Data berhasil dihapus",
             });
-    };
+            setTimeout(async () => {
+              await api.delete(`guru/${username}`);
+              return (window.location.href = "/guru");
+            }, 500);
+          }
+        } catch (e) {
+          console.log(e.message);
+        }
+        return true;
+      });
+  };
 
   return (
     <div onClick={popUpDeleteGuruById} className="cursor-pointer outline-none">

@@ -42,15 +42,14 @@ function StatusById({ row, dataGuru }) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [status, setStatus] = useState("");
-  const [error, setError] = useState("");
 
   const updateStatus = async (e) => {
     e.preventDefault();
-    const data = { status };
+    const data = { status_id: status };
 
     try {
       let response = await api
-        .post(`guru/${row.nip}`, data, {
+        .patch(`guru/${row.nip}`, data, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -66,7 +65,7 @@ function StatusById({ row, dataGuru }) {
         dataGuru();
       }
     } catch (error) {
-      setError(error.response.data.message);
+      return error;
     }
   };
 

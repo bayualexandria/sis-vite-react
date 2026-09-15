@@ -28,7 +28,7 @@ function Guru() {
       const response = await api.get("guru/");
       const data = response?.data?.data ?? [];
 
-      console.log("Data guru:", data);
+     
 
       setGuru(data);
       setFilter(data);
@@ -152,69 +152,66 @@ function Guru() {
 
   return (
     <Main>
-      <div className="grid min-h-screen grid-cols-1 bg-slate-100 lg:grid-cols-6">
-        <div className="p-4 lg:col-span-5 lg:col-start-2 lg:p-5">
+      <div className="grid grid-cols-6 bg-slate-100">
+        <div className="col-span-5 col-start-2 p-5 overflow-y-auto">
           {/* Header */}
           <div className="flex justify-start py-4">
             <h4 className="text-xl font-bold text-slate-500">Data Guru</h4>
           </div>
 
           <div className="flex flex-col gap-y-10">
-            <div className="grid grid-cols-1 gap-5">
-              <div className="rounded-lg bg-white p-5 shadow-md">
-                <div className="w-full">
-                  {/* Toolbar */}
-                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    {/* Search */}
-                    <div className="relative w-full sm:w-80">
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari data guru..."
-                        className="w-full rounded-md border border-sky-500 bg-white py-2 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-200"
-                      />
+            <div className="grid gap-5 grid-col-1 ">
+              <div className="w-full">
+                {/* Toolbar */}
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Search */}
+                  <div className="relative w-full sm:w-80">
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Cari data guru..."
+                      className="w-full rounded-md border border-sky-500 bg-white py-2 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-200"
+                    />
 
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="h-5 w-5 text-sky-500"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Tombol */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <AddDataGuru dataGuru={dataGuru} />
-
-                      <ExcelExport data={guru} fileName="Data Guru" />
-
-                      <ShowDataTrashGuru />
+                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="h-5 w-5 text-sky-500"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                      </svg>
                     </div>
                   </div>
 
-                  {/* Table */}
-                  <DataTable
-                    columns={columns}
-                    data={filter}
-                    progressPending={pending}
-                    pagination
-                    selectableRowsHighlight
-                    highlightOnHover
-                    responsive
-                    persistTableHead
-                  />
+                  {/* Tombol */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <AddDataGuru dataGuru={dataGuru} />
+
+                    <ExcelExport data={guru} fileName="Data Guru" />
+
+                    <ShowDataTrashGuru />
+                  </div>
                 </div>
+              </div>
+              <div className="p-1 transition duration-300 bg-white rounded-lg shadow-md ">
+                {/* Table */}
+                <DataTable
+                  columns={columns}
+                  data={filter}
+                  progressPending={pending}
+                  pagination
+                  selectableRowsHighlight
+                  highlightOnHover
+                />
               </div>
             </div>
           </div>
