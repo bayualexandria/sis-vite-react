@@ -9,6 +9,7 @@ import ShowDataTrashSiswa from "./trash-data/ShowDataTrashSiswa";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
 import AddDataSiswa from "./modal/AddDataSiswa";
 import api from "../../utils/repositories";
+import KartuTandaSiswa from "./KartuTandaSiswa";
 
 function Siswa() {
   const [user, setUser] = useState([]);
@@ -65,6 +66,7 @@ function Siswa() {
           name: "Action",
           selector: (row) => (
             <div className="flex flex-row gap-x-3">
+              <KartuTandaSiswa siswa={row} />
               <Link to={`/siswa/${row.nis}`}>
                 <div className="w-6 h-6 rounded-full shadow-md flex justify-center items-center border border-sky-500 hover:text-white text-sky-500 hover:bg-sky-500 transition duration-200">
                   <svg

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import Box from "@mui/material/Box";
-
-import repositori from "../../../utils/repositories";
 import { Modal } from "@mui/material";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import api from "../../../utils/repositories";
 
 const style = {
   position: "absolute",
@@ -42,16 +41,16 @@ function AddDataSiswa(props) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [loading, setloading] = useState(false);
+  const [error, setError] = useState("");
+
   const [nip, setNIP] = useState("");
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
   const [noHP, setNoHP] = useState("");
   const [jenisKelamin, setJenisKelamin] = useState("");
-  const [status, setStatus] = useState("");
-  const [loading, setloading] = useState(false);
-
   const [alamat, setAlamat] = useState("");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState("");
   const data = {
     nip,
     nama,
@@ -59,51 +58,53 @@ function AddDataSiswa(props) {
     no_hp: noHP,
     jenis_kelamin: jenisKelamin,
     alamat,
-    status,
+    status_id: status,
   };
 
   const saveGuru = async (e) => {
     setloading(true);
     e.preventDefault();
-  
 
     try {
-      let response = await fetch(`${repositori}guru`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
+      let response = await api.post(`guru/`, data);
 
-        },
-      }).then((res) => res.json());
-      if (response.status === 401) {
+      setTimeout(async () => {
+        setloading(false);
+        handleClose();
+        await templateModalSuccess.fire({
+          icon: "success",
+          title: response.data.message,
+        });
+        setTimeout(() => props.dataGuru(), 1000);
+      }, 1000);
+    } catch (error) {
+      console.log("error post guru", error.response);
+      if (error.response.status === 400) {
         setTimeout(() => {
           setloading(false);
-          setError(response.message);
+          setError(error.response.data.data);
         }, 1000);
       }
-      if (response.status === 403) {
+      if (error.response.status === 403) {
         setTimeout(async () => {
           setloading(false);
           handleClose();
           await templateModalSuccess.fire({
             icon: "error",
-            title: response.message,
+            title: error.response.message,
           });
         }, 1000);
       }
-      if (response.status === 200) {
+      if (error.response.status === 500) {
         setTimeout(async () => {
           setloading(false);
-          handleClose();
           await templateModalSuccess.fire({
-            icon: "success",
-            title: response.message,
+            icon: "error",
+            title: error.response.data.message,
           });
-          setTimeout(() => props.dataGuru(), 1000);
         }, 1000);
       }
-    } catch (error) {
+      setloading(false);
       return error;
     }
   };
@@ -317,9 +318,9 @@ function AddDataSiswa(props) {
                       <option value="2">Wali Kelas</option>
                       <option value="3">Guru</option>
                     </select>
-                    {error.status ? (
+                    {error.status_id ? (
                       <p className="text-xs font-thin text-rose-500">
-                        {error.status}
+                        {error.status_id}
                       </p>
                     ) : (
                       ""

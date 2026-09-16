@@ -1,4 +1,3 @@
-import React from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import api from "../../../utils/repositories";
@@ -23,8 +22,8 @@ const templateModalSuccess = withReactContent(Swal).mixin({
 });
 
 function StatusUserVerified({ row, dataGuru }) {
+  console.log("status", row.email_verified_at);
   const updateEmailVerifiedAtToNull = async () => {
-    
     try {
       let response = await api
         .get(`user/${row.nip}/update-email-verified`)
@@ -42,11 +41,11 @@ function StatusUserVerified({ row, dataGuru }) {
   };
 
   const updateEmailVerifiedAt = async () => {
-    
     try {
       let response = await api
         .get(`user/${row.nip}/update-email-verified-at`)
         .then((res) => res.data);
+      console.log(response);
       if (response.status === 200) {
         templateModalSuccess.fire({
           icon: "success",
@@ -62,7 +61,7 @@ function StatusUserVerified({ row, dataGuru }) {
   return (
     <>
       <div className="flex flex-row justify-center">
-        {row.email_verified_at != null ? (
+        {row.email_verified_at ? (
           <span
             className={`text-green-500 px-2 py-1 flex flex-row items-center cursor-pointer`}
             onClick={updateEmailVerifiedAtToNull}

@@ -192,7 +192,7 @@ function ShowDataTrashGuru() {
   useEffect(() => {
     const result = dataTrash.filter((item) => {
       return (
-        item.nama.toLowerCase().match(searchTrash.toLowerCase()) ||
+        item.name.toLowerCase().match(searchTrash.toLowerCase()) ||
         item.nip.toLowerCase().match(searchTrash.toLowerCase()) ||
         item.jenis_kelamin.toLowerCase().match(searchTrash.toLowerCase()) ||
         item.no_hp.toLowerCase().match(searchTrash.toLowerCase())

@@ -7,6 +7,7 @@ import repositori from "../../utils/repositories";
 import repoimages from "../../utils/repoimages";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import api from "../../utils/repositories";
 
 function UpdateDataGuru() {
   const { nip } = useParams();
@@ -20,20 +21,11 @@ function UpdateDataGuru() {
   const [alamat, setAlamat] = useState("");
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
-  const [user, setUser] = useState("");
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
+
 
   const getDataGuruById = async () => {
     try {
-      let response = await axios
-        .get(`${repositori}guru/${nip}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token[0],
-          },
-        })
-        .then((res) => res.data);
+      let response = await api.get(`guru/${nip}`).then((res) => res.data);
       setGuru(response.data);
 
       console.log(response);
@@ -42,19 +34,7 @@ function UpdateDataGuru() {
     }
   };
 
-  const getUserById = async () => {
-    try {
-      let response = await axios
-        .get(`${repositori}user/${nip}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token[0],
-          },
-        })
-        .then((res) => res.data);
-      setUser(response.data);
-    } catch (error) {}
-  };
+
 
   const updateData = async (e) => {
     e.preventDefault();
@@ -124,8 +104,8 @@ function UpdateDataGuru() {
 
   useEffect(() => {
     getDataGuruById();
-    getUserById();
-  }, );
+
+  });
 
   return (
     <Main>
@@ -172,7 +152,7 @@ function UpdateDataGuru() {
                         name="nama"
                         id="nama"
                         className="rounded-md shadow-md px-2 py-1 border border-sky-500 outline-none"
-                        defaultValue={guru.nama}
+                        defaultValue={guru.name}
                         onChange={(e) => setNama(e.target.value)}
                       />
                     </div>
@@ -190,7 +170,7 @@ function UpdateDataGuru() {
                         name="nama"
                         id="nama"
                         className="rounded-md shadow-md px-2 py-1 border border-sky-500 outline-none"
-                        defaultValue={user.email}
+                        defaultValue={guru.email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
                       {error === "Email yang anda masukan sudah terdaftar!" ? (
