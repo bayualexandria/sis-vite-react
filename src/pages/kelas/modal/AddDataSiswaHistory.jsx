@@ -1,34 +1,24 @@
-import React, { useState } from "react";
-import Cookies from "js-cookie";
-import repositori from "../../../utils/repositories";
+import { useState } from "react";
+import api from "../../../utils/repositories";
 
-function AddDataSiswaHistory({ siswaId, kelasId, getDataSiswa }) {
+function AddDataSiswaHistory({ siswaId, kelasId, waliKelasId, getDataSiswa }) {
   const [btnAdd, setBtnAdd] = useState(false);
-  const dataToken = Cookies.get("authentication");
-  const token = dataToken.split(",");
-  const data = {
-    siswa_id: siswaId,
-    kelas_id: kelasId,
-  };
+  const formData = new FormData();
+  formData.append("siswa_id", siswaId);
+  formData.append("kelas_id", kelasId);
+  formData.append("wali_kelas_id", waliKelasId);
 
   const insertHistorySiswa = async () => {
     setBtnAdd(!btnAdd);
     try {
-      let response = await fetch(`${repositori}siswa/kelas`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
-      console.log("data", data);
+      let response = await api.post(`siswa-kelas/`, formData);
+      console.log("data", formData);
       console.log("siswa hello", response);
       setTimeout(() => {
         getDataSiswa();
       }, 0.1);
     } catch (error) {
-      console.log("error", error);
+      console.log("error", error.response);
     }
   };
   return (
@@ -38,13 +28,13 @@ function AddDataSiswaHistory({ siswaId, kelasId, getDataSiswa }) {
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          stroke-width="1.5"
+          strokeWidth="1.5"
           stroke="currentColor"
-          class="size-5 text-lime-500 animate-pulse"
+          className="size-5 text-lime-500 animate-pulse"
         >
           <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             d="m4.5 12.75 6 6 9-13.5"
           />
         </svg>

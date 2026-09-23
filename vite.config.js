@@ -11,12 +11,8 @@ export default defineConfig({
     tailwindcss(),
   ],
   // Tambahkan base pada folder project ketika mau di build contoh "base="/sis/"
-  base: "/",
   server: {
     host: true,
-    allowedHosts: [
-      "localhhost",
-
-    ],
+    allowedHosts: ["localhost"],
   },
 });

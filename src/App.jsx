@@ -19,11 +19,13 @@ import {
   KelasById,
   PageNotFound,
 } from "./pages/Index";
+import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Website />} />
+      <Route path="/ppdb" element={<WebsitePPDB />} />
       <Route path="/absensi" element={<Absensi />} />
       <Route path="*" element={<PageNotFound />} />
 
@@ -139,7 +141,7 @@ function App() {
 
       {/* Kelas by id */}
       <Route
-        path="/kelas/:nip/:id"
+        path="/kelas/:nip/:id/:kelasid"
         element={
           <PrivateRoute>
             <KelasById />

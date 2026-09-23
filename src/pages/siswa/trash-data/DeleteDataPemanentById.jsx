@@ -1,4 +1,3 @@
-import React from "react";
 import Swal from "sweetalert2";
 import Cookies from "js-cookie";
 import withReactContent from "sweetalert2-react-content";
@@ -8,31 +7,48 @@ function DeleteDataPemanentById({ nis }) {
   const restoreDataSiswaById = async () => {
     const templateModalSuccess = withReactContent(Swal).mixin({
       customClass: {
+        container: "swal-container",
+        popup:
+          "rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800",
+        title: "text-lg font-bold text-slate-800 dark:text-white",
+        htmlContainer: "text-sm text-slate-600 dark:text-slate-300",
         confirmButton:
-          "bg-sky-500 font-bold text-white outline-none border border-sky-500 rounded-md ml-2 px-2 py-0.5 cursor-pointer",
-        cancelButton:
-          "bg-rose-500  font-bold text-white outline-none border border-rose-500 rounded-md mr-2 px-2 py-0.5 cursor-pointer",
+          "rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700",
       },
+
       buttonsStyling: false,
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.onmouseenter = Swal.stopTimer;
-        toast.onmouseleave = Swal.resumeTimer;
+
+      didOpen: () => {
+        const container = document.querySelector(".swal-container");
+
+        if (container) {
+          container.style.zIndex = "99999";
+        }
       },
     });
 
     const templateModal = withReactContent(Swal).mixin({
       customClass: {
+        container: "swal-container",
+        popup:
+          "rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800",
+        title: "text-lg font-bold text-slate-800 dark:text-white",
+        htmlContainer: "text-sm text-slate-600 dark:text-slate-300",
         confirmButton:
-          "bg-sky-500 font-bold text-white outline-none border border-sky-500 rounded-md ml-2 px-2 py-0.5 cursor-pointer",
+          "rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700",
         cancelButton:
-          "bg-rose-500  font-bold text-white outline-none border border-rose-500 rounded-md mr-2 px-2 py-0.5 cursor-pointer",
+          "ml-2 rounded-xl bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600",
       },
+
       buttonsStyling: false,
+
+      didOpen: () => {
+        const container = document.querySelector(".swal-container");
+
+        if (container) {
+          container.style.zIndex = "99999";
+        }
+      },
     });
 
     await templateModal
