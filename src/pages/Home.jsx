@@ -6,6 +6,9 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -37,7 +40,7 @@ const Icons = {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+        d="M22 21v-2a4 4 0 0 3-3.87M16 3.13a4 4 0 0 1 0 7.75"
       />
     </svg>
   ),
@@ -126,6 +129,27 @@ const Icons = {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M5 12h14M13 6l6 6-6 6"
+      />
+    </svg>
+  ),
+
+  PieChartIcon: ({ className = "w-5 h-5" }) => (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21.21 15.89A10 10 0 1 1 8 2.83"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M22 12A10 10 0 0 0 12 2v10z"
       />
     </svg>
   ),
@@ -220,7 +244,7 @@ function CustomTooltip({ active, payload }) {
   return (
     <div className="min-w-[150px] rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-800">
       <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
-        {item.payload.name}
+        {item.name || item.payload.name}
       </p>
 
       <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
@@ -235,26 +259,10 @@ function CustomTooltip({ active, payload }) {
 }
 
 /* =========================================================
-   PROFESSIONAL CHART
+   PROSTHETIC BAR CHART
 ========================================================= */
 
-function SchoolChart({ guru, siswa, loading }) {
-  const chartData = useMemo(
-    () => [
-      {
-        name: "Guru",
-        total: guru,
-      },
-      {
-        name: "Siswa",
-        total: siswa,
-      },
-    ],
-    [guru, siswa],
-  );
-
-  const totalData = guru + siswa;
-
+function SchoolBarChart({ chartData, loading, totalData }) {
   return (
     <div
       className="
@@ -279,11 +287,11 @@ function SchoolChart({ guru, siswa, loading }) {
 
             <div>
               <h3 className="font-semibold text-slate-900 dark:text-white">
-                Statistik Sekolah
+                Statistik Batang
               </h3>
 
               <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                Perbandingan data Guru dan Siswa
+                Perbandingan data Guru, Siswa dan Mata Pelajaran
               </p>
             </div>
           </div>
@@ -304,7 +312,6 @@ function SchoolChart({ guru, siswa, loading }) {
       <div className="mt-6 flex items-center gap-5 border-b border-slate-100 pb-4 dark:border-slate-800">
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-orange-500" />
-
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
             Guru
           </span>
@@ -312,9 +319,15 @@ function SchoolChart({ guru, siswa, loading }) {
 
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-lime-500" />
-
           <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
             Siswa
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            Mata Pelajaran
           </span>
         </div>
       </div>
@@ -324,7 +337,6 @@ function SchoolChart({ guru, siswa, loading }) {
         {loading ? (
           <div className="flex h-full items-end justify-center gap-16 px-10 pb-12">
             <div className="h-32 w-20 animate-pulse rounded-t-xl bg-slate-100 dark:bg-slate-800" />
-
             <div className="h-52 w-20 animate-pulse rounded-t-xl bg-slate-100 dark:bg-slate-800" />
           </div>
         ) : (
@@ -382,10 +394,7 @@ function SchoolChart({ guru, siswa, loading }) {
                 animationDuration={900}
               >
                 {chartData.map((entry) => (
-                  <Cell
-                    key={entry.name}
-                    fill={entry.name === "Guru" ? "#f97316" : "#84cc16"}
-                  />
+                  <Cell key={entry.name} fill={entry.color} />
                 ))}
 
                 <LabelList
@@ -406,15 +415,107 @@ function SchoolChart({ guru, siswa, loading }) {
 }
 
 /* =========================================================
+   PIE / CIRCLE CHART
+========================================================= */
+
+function SchoolPieChart({ chartData, loading, totalData }) {
+  return (
+    <div
+      className="
+        rounded-2xl border border-slate-200 bg-white
+        p-5 shadow-sm sm:p-6
+        dark:border-slate-800 dark:bg-slate-900
+      "
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            className="
+              flex h-10 w-10 items-center justify-center rounded-xl
+              bg-slate-100 text-slate-700
+              dark:bg-slate-800 dark:text-slate-200
+            "
+          >
+            <Icons.PieChartIcon className="h-5 w-5" />
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-white">
+              Persentase Distribusi
+            </h3>
+
+            <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+              Proporsi data sekolah
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* CHART */}
+      <div className="relative mt-6 h-[340px] w-full">
+        {loading ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-48 w-48 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800" />
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Tooltip content={<CustomTooltip />} />
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="45%"
+                innerRadius={65}
+                outerRadius={95}
+                paddingAngle={5}
+                dataKey="total"
+                animationDuration={900}
+              >
+                {chartData.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
+              </Pie>
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                iconType="circle"
+                formatter={(value) => (
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                    {value}
+                  </span>
+                )}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+
+        {/* CENTER LABEL (DONUT HOLE) */}
+        {!loading && (
+          <div className="pointer-events-none absolute inset-0 mb-8 flex flex-col items-center justify-center">
+            <span className="text-xs font-medium text-slate-400">Total</span>
+            <span className="text-xl font-bold text-slate-800 dark:text-white">
+              {totalData}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
    HOME
 ========================================================= */
 
 function Home() {
   const [guru, setGuru] = useState(0);
   const [siswa, setSiswa] = useState(0);
+  const [mapel, setMapel] = useState(0);
 
   const [loadingGuru, setLoadingGuru] = useState(true);
   const [loadingSiswa, setLoadingSiswa] = useState(true);
+  const [loadingMapel, setLoadingMapel] = useState(true);
 
   /* =======================================================
      GET GURU
@@ -423,9 +524,7 @@ function Home() {
   const dataGuru = useCallback(async () => {
     try {
       setLoadingGuru(true);
-
       const response = await api.get("guru/");
-
       if (response?.status === 200) {
         setGuru(response?.data?.data?.length ?? 0);
       }
@@ -444,9 +543,7 @@ function Home() {
   const dataSiswa = useCallback(async () => {
     try {
       setLoadingSiswa(true);
-
       const response = await api.get("siswa/");
-
       if (response?.status === 200) {
         setSiswa(response?.data?.data?.length ?? 0);
       }
@@ -459,15 +556,58 @@ function Home() {
   }, []);
 
   /* =======================================================
+     GET MAPEL
+  ======================================================= */
+
+  const dataMapel = useCallback(async () => {
+    try {
+      setLoadingMapel(true);
+      const response = await api.get("mapel/");
+      if (response?.status === 200) {
+        setMapel(response?.data?.data?.length ?? 0);
+      }
+    } catch (error) {
+      console.error("Gagal mengambil data mapel:", error);
+      setMapel(0);
+    } finally {
+      setLoadingMapel(false);
+    }
+  }, []);
+
+  /* =======================================================
      INITIAL LOAD
   ======================================================= */
 
   useEffect(() => {
     dataGuru();
     dataSiswa();
-  }, [dataGuru, dataSiswa]);
+    dataMapel();
+  }, [dataGuru, dataSiswa, dataMapel]);
 
-  const loading = loadingGuru || loadingSiswa;
+  const loading = loadingGuru || loadingSiswa || loadingMapel;
+
+  const chartData = useMemo(
+    () => [
+      {
+        name: "Guru",
+        total: guru,
+        color: "#f97316",
+      },
+      {
+        name: "Siswa",
+        total: siswa,
+        color: "#84cc16",
+      },
+      {
+        name: "Mata Pelajaran",
+        total: mapel,
+        color: "#00A6F4",
+      },
+    ],
+    [guru, siswa, mapel],
+  );
+
+  const totalData = guru + siswa + mapel;
 
   return (
     <Main>
@@ -481,7 +621,6 @@ function Home() {
             <div>
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Sistem Informasi Sekolah
                 </span>
@@ -507,7 +646,6 @@ function Home() {
             >
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
 
@@ -566,11 +704,11 @@ function Home() {
                 to="/mapel"
                 title="Mata Pelajaran"
                 description="Mata pelajaran tersedia"
-                count={8}
-                loading={false}
+                count={mapel}
+                loading={loadingMapel}
                 icon={Icons.Book}
-                iconWrapper="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
-                accent="bg-indigo-500"
+                iconWrapper="bg-indigo-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
+                accent="bg-sky-500"
               />
 
               <StatCard
@@ -587,11 +725,25 @@ function Home() {
           </section>
 
           {/* =================================================
-              CHART
+              CHARTS (BAR & PIE GRID)
           ================================================= */}
 
-          <section className="mt-8">
-            <SchoolChart guru={guru} siswa={siswa} loading={loading} />
+          <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <SchoolBarChart
+                chartData={chartData}
+                loading={loading}
+                totalData={totalData}
+              />
+            </div>
+
+            <div className="lg:col-span-1">
+              <SchoolPieChart
+                chartData={chartData}
+                loading={loading}
+                totalData={totalData}
+              />
+            </div>
           </section>
 
           {/* =================================================

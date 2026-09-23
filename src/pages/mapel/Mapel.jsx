@@ -5,8 +5,6 @@ import DataTable from "react-data-table-component";
 import Main from "../../components/Main/Main";
 import AddDataGuru from "../guru/modal/AddDataGuru";
 import DeleteGuruById from "../guru/DeleteGuruById";
-import StatusById from "../guru/modal/StatusById";
-import StatusUserVerified from "../guru/modal/StatusUserVerified";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
 import ShowDataTrashGuru from "../guru/trash-data/ShowDataTrashGuru";
 import api from "../../utils/repositories";
@@ -316,17 +314,17 @@ function Mapel() {
      GET DATA GURU
   ======================================================= */
 
-  const dataGuru = useCallback(async () => {
+  const dataMapel = useCallback(async () => {
     try {
       setPending(true);
 
-      const response = await api.get("guru/");
+      const response = await api.get("mapel/");
 
       const data = response?.data?.data ?? [];
 
       setGuru(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Gagal mengambil data guru:", error);
+      console.error("Gagal mengambil data mapel:", error);
       setGuru([]);
     } finally {
       setPending(false);
@@ -338,8 +336,8 @@ function Mapel() {
   ======================================================= */
 
   useEffect(() => {
-    dataGuru();
-  }, [dataGuru]);
+    dataMapel();
+  }, [dataMapel]);
 
   /* =======================================================
      FILTER DATA
@@ -353,18 +351,14 @@ function Mapel() {
     }
 
     return guru.filter((item) => {
-      const name = String(item?.name ?? "").toLowerCase();
-      const nip = String(item?.nip ?? "").toLowerCase();
-      const jenisKelamin = String(item?.jenis_kelamin ?? "").toLowerCase();
-      const noHp = String(item?.no_hp ?? "").toLowerCase();
-      const alamat = String(item?.alamat ?? "").toLowerCase();
+      const nama = String(item?.nama ?? "").toLowerCase();
+      const kode = String(item?.kode ?? "").toLowerCase();
+      const deskripsi = String(item?.deskripsi ?? "").toLowerCase();
 
       return (
-        name.includes(keyword) ||
-        nip.includes(keyword) ||
-        jenisKelamin.includes(keyword) ||
-        noHp.includes(keyword) ||
-        alamat.includes(keyword)
+        nama.includes(keyword) ||
+        kode.includes(keyword) ||
+        deskripsi.includes(keyword)
       );
     });
   }, [guru, search]);
@@ -433,27 +427,29 @@ function Mapel() {
   const columns = useMemo(
     () => [
       {
-        name: "Nama Lengkap",
-        selector: (row) => row?.name ?? "-",
+        name: "Nama Mapel",
+        selector: (row) => row?.nama ?? "-",
         sortable: true,
         width: "230px",
 
         cell: (row) => {
-          const name = String(row?.name ?? "-");
+          const nama = String(row?.nama ?? "-");
+          const parts = row?.kode ? row.kode.split("-") : [];
+          const singkatan = parts.length >= 2 ? parts[1] : row?.kode;
 
           return (
             <div className="flex min-w-0 items-center gap-3 py-2">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-600 dark:bg-sky-950/50 dark:text-sky-400">
-                {name.charAt(0).toUpperCase()}
+                {singkatan.charAt(0).toUpperCase()}
               </div>
 
               <div className="min-w-0">
                 <p className="truncate font-medium text-slate-700 dark:text-slate-200">
-                  {name}
+                  {nama}
                 </p>
 
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Guru
+                  {singkatan || "-"}
                 </p>
               </div>
             </div>
@@ -462,72 +458,27 @@ function Mapel() {
       },
 
       {
-        name: "NIP",
-        selector: (row) => row?.nip ?? "-",
+        name: "Kode",
+        selector: (row) => row?.kode ?? "-",
         sortable: true,
         width: "155px",
 
         cell: (row) => (
           <span className="font-mono text-sm text-slate-600 dark:text-slate-300">
-            {row?.nip ?? "-"}
+            {row?.kode ?? "-"}
           </span>
         ),
       },
 
       {
-        name: "Jenis Kelamin",
-        selector: (row) => row?.jenis_kelamin ?? "-",
+        name: "Deskripsi",
+        selector: (row) => row?.deskripsi ?? "-",
         sortable: true,
-        width: "150px",
-
         cell: (row) => (
           <span className="text-sm text-slate-600 dark:text-slate-300">
-            {row?.jenis_kelamin ?? "-"}
+            {row?.deskripsi ?? "-"}
           </span>
         ),
-      },
-
-      {
-        name: "No. Handphone",
-        selector: (row) => row?.no_hp ?? "-",
-        sortable: true,
-        width: "155px",
-
-        cell: (row) => (
-          <span className="text-sm text-slate-600 dark:text-slate-300">
-            {row?.no_hp ?? "-"}
-          </span>
-        ),
-      },
-
-      {
-        name: "Alamat",
-        selector: (row) => row?.alamat ?? "-",
-        sortable: true,
-        minWidth: "180px",
-
-        cell: (row) => (
-          <span
-            title={row?.alamat ?? "-"}
-            className="block max-w-[280px] truncate text-sm text-slate-500 dark:text-slate-400"
-          >
-            {row?.alamat ?? "-"}
-          </span>
-        ),
-      },
-
-      {
-        name: "Status",
-        cell: (row) => <StatusById row={row} dataGuru={dataGuru} />,
-        sortable: true,
-        width: "150px",
-      },
-
-      {
-        name: "User Status",
-        cell: (row) => <StatusUserVerified row={row} dataGuru={dataGuru} />,
-        sortable: true,
-        width: "150px",
       },
 
       {
@@ -538,7 +489,7 @@ function Mapel() {
             {/* EDIT */}
 
             <Link
-              to={`/guru/${row?.nip}`}
+              to={`/guru/${row?.id}`}
               title="Edit data guru"
               className="
                 group flex h-8 w-8 items-center justify-center
@@ -568,7 +519,7 @@ function Mapel() {
                 dark:hover:border-red-900 dark:hover:bg-red-950/40
               "
             >
-              <DeleteGuruById username={row?.nip} />
+              <DeleteGuruById username={row?.id} />
             </div>
           </div>
         ),
@@ -579,7 +530,7 @@ function Mapel() {
         width: "100px",
       },
     ],
-    [dataGuru],
+    [dataMapel],
   );
 
   /* =======================================================
@@ -636,7 +587,7 @@ function Mapel() {
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    Total Guru
+                    Total Mapel
                   </p>
 
                   <p className="text-lg font-bold text-slate-700 dark:text-white">
@@ -716,7 +667,7 @@ function Mapel() {
                 {/* ACTIONS */}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <AddDataGuru dataGuru={dataGuru} />
+                  <AddDataGuru dataGuru={dataMapel} />
 
                   <ExcelExport data={guru} fileName="Data Guru" />
 
