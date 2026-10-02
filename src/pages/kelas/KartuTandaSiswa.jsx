@@ -15,6 +15,7 @@ const CARD_WIDTH_PX = 540;
 const CARD_HEIGHT_PX = 340;
 
 function KartuTandaSiswa({ siswa }) {
+  console.log(siswa);
 
   const [open, setOpen] = React.useState(false);
   const [isDownloading, setIsDownloading] = React.useState(false);
@@ -284,7 +285,7 @@ function KartuTandaSiswa({ siswa }) {
       // --------------------------------------------------------
       // Nama file
       // --------------------------------------------------------
-      const fileName = sanitizeFileName(siswa?.name || "Kartu-Siswa");
+      const fileName = sanitizeFileName(siswa?.nama_siswa || "Kartu-Siswa");
 
       pdf.save(`${fileName}-KTS.pdf`);
     } catch (error) {
@@ -557,7 +558,7 @@ function KartuTandaSiswa({ siswa }) {
                   {profileImage ? (
                     <img
                       src={profileImage}
-                      alt={siswa?.name || "Siswa"}
+                      alt={siswa?.nama_siswa || "Siswa"}
                       crossOrigin="anonymous"
                       className="
                         h-full
@@ -566,7 +567,7 @@ function KartuTandaSiswa({ siswa }) {
                       "
                     />
                   ) : (
-                    String(siswa?.name || "S")
+                    String(siswa?.nama_siswa || "S")
                       .charAt(0)
                       .toUpperCase()
                   )}
@@ -574,7 +575,7 @@ function KartuTandaSiswa({ siswa }) {
 
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-700">
-                    {siswa?.name || "-"}
+                    {siswa?.nama_siswa || "-"}
                   </p>
 
                   <p className="text-xs text-slate-400">
@@ -816,7 +817,7 @@ function KartuTandaSiswa({ siswa }) {
                       {profileImage ? (
                         <img
                           src={profileImage}
-                          alt={siswa?.name || "Siswa"}
+                          alt={siswa?.nama_siswa || "Siswa"}
                           crossOrigin="anonymous"
                           className="
                             h-full
@@ -847,9 +848,10 @@ function KartuTandaSiswa({ siswa }) {
                     >
                       <DataRow label="NIS" value={siswa?.nis} />
 
-                      <DataRow label="Nama" value={siswa?.name} />
+                      <DataRow label="Nama" value={siswa?.nama_siswa} />
 
                       <DataRow label="Tempat/Tgl Lahir" value={siswa?.ttl} />
+                      <DataRow label="Jurusan" value={siswa?.jurusan} />
 
                       <DataRow
                         label="Jenis Kelamin"

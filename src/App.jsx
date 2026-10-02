@@ -21,12 +21,18 @@ import {
 } from "./pages/Index";
 import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
 
+// Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
+const ROLES = {
+  ADMIN: "1",
+  WALIKELAS: "2",
+  GURU: "3",
+};
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Website />} />
       <Route path="/ppdb" element={<WebsitePPDB />} />
-      <Route path="/absensi" element={<Absensi />} />
       <Route path="*" element={<PageNotFound />} />
 
       {/* Authentication */}
@@ -48,7 +54,7 @@ function App() {
       />
 
       {/* Start Authorization */}
-      {/* Main root */}
+      {/* Main root - Dapat diakses semua user yang login */}
       <Route
         path="/home"
         element={
@@ -57,7 +63,22 @@ function App() {
           </PrivateRoute>
         }
       />
-      {/* Profile */}
+
+      {/* Absensi - Dapat diakses oleh Admin, Guru, dan Siswa */}
+      <Route
+        path="/absensi"
+        element={
+          <PrivateRoute>
+            <RoleRoute
+              allowedRoles={[ROLES.ADMIN, ROLES.GURU, ROLES.WALIKELAS]}
+            >
+              <Absensi />
+            </RoleRoute>
+          </PrivateRoute>
+        }
+      />
+
+      {/* Profile - Dapat diakses semua user yang login */}
       <Route
         path="/profile"
         element={
@@ -66,7 +87,8 @@ function App() {
           </PrivateRoute>
         }
       />
-      {/* Change password */}
+
+      {/* Change password - Dapat diakses semua user yang login */}
       <Route
         path="/change-password"
         element={
@@ -75,66 +97,73 @@ function App() {
           </PrivateRoute>
         }
       />
-      {/* Guru */}
+
+      {/* Guru - Contoh: Bisa diakses oleh Admin dan Guru */}
       <Route
         path="/guru"
         element={
           <PrivateRoute>
-            <RoleRoute role="1">
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
               <Guru />
             </RoleRoute>
           </PrivateRoute>
         }
       />
-      {/* Update guru by id */}
+
+      {/* Update guru by id - Hanya Admin */}
       <Route
         path="/guru/:nip"
         element={
           <PrivateRoute>
-            <RoleRoute role="1">
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
               <UpdateDataGuru />
             </RoleRoute>
           </PrivateRoute>
         }
       />
-      {/* Siswa */}
+
+      {/* Siswa - Bisa diakses oleh Admin, Guru, dan Siswa */}
       <Route
         path="/siswa"
         element={
           <PrivateRoute>
-            <RoleRoute role="1">
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
               <Siswa />
             </RoleRoute>
           </PrivateRoute>
         }
       />
-      {/* Update data siswa */}
+
+      {/* Update data siswa - Bisa diakses Admin dan Guru */}
       <Route
         path="/siswa/:nis"
         element={
           <PrivateRoute>
-            <RoleRoute role="1">
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
               <GetById />
             </RoleRoute>
           </PrivateRoute>
         }
       />
-      {/* Mapel */}
       <Route
         path="/mapel"
         element={
           <PrivateRoute>
-            <Mapel />
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
+              <Mapel />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
-      {/* Kelas */}
 
+      {/* Kelas - Bisa diakses Admin, Guru, dan Siswa */}
       <Route
         path="/kelas"
         element={
           <PrivateRoute>
-            <Kelas />
+            <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.WALIKELAS]}>
+              <Kelas />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -144,17 +173,21 @@ function App() {
         path="/kelas/:nip/:id/:kelasid"
         element={
           <PrivateRoute>
-            <KelasById />
+            <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.WALIKELAS]}>
+              <KelasById />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
 
-      {/* Profile Sekolah */}
+      {/* Profile Sekolah - Hanya Admin */}
       <Route
         path="/profile-sekolah"
         element={
           <PrivateRoute>
-            <Sekolah />
+            <RoleRoute allowedRoles={[ROLES.ADMIN]}>
+              <Sekolah />
+            </RoleRoute>
           </PrivateRoute>
         }
       />
@@ -163,10 +196,10 @@ function App() {
   );
 }
 
-function PrivateRoute({ children }) {
-  // "is_logged_in" adalah cookie biasa yang diizinkan dibaca JS
-  const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
+// ---------------- Helper Components ----------------
 
+function PrivateRoute({ children }) {
+  const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
   return isLoggedIn ? children : <Navigate to="/login" replace />;
 }
 
@@ -178,13 +211,24 @@ function UnAthenticated({ children }) {
   }
   return <Navigate to="/home" replace={true} />;
 }
-// buat function user role Admin, Guru, Siswa dan menambahkannya ke Route
-// Jika role nya lebih dari 1
-function RoleRoute({ role, children }) {
+
+/**
+ * RoleRoute pendukung Multiple Roles
+ * @param {Array<string>|string} allowedRoles - Daftar role ID yang diizinkan, misal: ["1", "2"]
+ */
+function RoleRoute({ allowedRoles, children }) {
   const userRole = localStorage.getItem("id_user");
-  if (userRole === role) {
+
+  // Pengecekan apakah userRole ada di dalam daftar allowedRoles
+  const hasAccess = Array.isArray(allowedRoles)
+    ? allowedRoles.includes(userRole)
+    : allowedRoles === userRole;
+
+  if (hasAccess) {
     return children;
   }
+
+  // Jika tidak memiliki akses, redirect ke halaman /home
   return <Navigate to="/home" replace={true} />;
 }
 

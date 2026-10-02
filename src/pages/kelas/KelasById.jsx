@@ -8,6 +8,7 @@ import ShowDataSiswa from "./modal/ShowDataSiswa";
 import RefreshDataSiswaByKelas from "./components/RefreshDataSiswaByKelas";
 import DeleteDataSiswaHistory from "./components/DeleteDataSiswaHistory";
 import api from "../../utils/repositories";
+import KartuTandaSiswa from "./KartuTandaSiswa";
 
 function KelasById() {
   const { nip, id, kelasid } = useParams();
@@ -158,6 +159,13 @@ function KelasById() {
         center: true,
         cell: (row) => (
           <div className="flex items-center justify-center">
+            {/* Kartu Siswa */}
+            <div
+              title="Kartu tanda siswa"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:border-violet-200 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-violet-500/50 dark:hover:bg-violet-500/10"
+            >
+              <KartuTandaSiswa siswa={row} />
+            </div>
             <DeleteDataSiswaHistory
               id={row?.id}
               getDataSiswaByKelas={getDataSiswaByKelas}

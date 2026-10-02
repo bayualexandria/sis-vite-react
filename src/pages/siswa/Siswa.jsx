@@ -7,7 +7,6 @@ import ShowDataTrashSiswa from "./trash-data/ShowDataTrashSiswa";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
 import AddDataSiswa from "./modal/AddDataSiswa";
 import api from "../../utils/repositories";
-import KartuTandaSiswa from "./KartuTandaSiswa";
 
 function Siswa() {
   const [user, setUser] = useState([]);
@@ -365,13 +364,7 @@ function Siswa() {
 
         cell: (row) => (
           <div className="flex items-center gap-2">
-            {/* Kartu Siswa */}
-            <div
-              title="Kartu tanda siswa"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:border-violet-200 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-violet-500/50 dark:hover:bg-violet-500/10"
-            >
-              <KartuTandaSiswa siswa={row} />
-            </div>
+           
 
             {/* Edit */}
             <Link

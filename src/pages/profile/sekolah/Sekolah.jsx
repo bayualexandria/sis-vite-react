@@ -6,8 +6,8 @@ import axios from "axios";
 
 import Main from "../../../components/Main/Main";
 import repo from "../../../utils/repo";
-import repositori from "../../../utils/repositories";
 import repoimages from "../../../utils/repoimages";
+import api from "../../../utils/repositories";
 
 const SwalReact = withReactContent(Swal);
 
@@ -234,8 +234,62 @@ export default function Sekolah() {
   const [namaSekolah, setNamaSekolah] = useState("");
   const [akreditasi, setAkreditasi] = useState("");
   const [noTelp, setNoTelp] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [error, setError] = useState("");
   const [alamat, setAlamat] = useState("");
 
+  /*
+   * ============================================================
+   * DARK MODE
+   * ============================================================
+   */
+  const getDarkMode = () => {
+    return (
+      document.documentElement.classList.contains("dark") ||
+      document.body.classList.contains("dark")
+    );
+  };
+  const [isDarkMode, setIsDarkMode] = useState(getDarkMode);
+
+  const onImageUpload = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setError("");
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Format gambar tidak valid. Gunakan PNG, JPG, JPEG, atau WEBP.");
+
+      e.target.value = "";
+
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Ukuran gambar maksimal 2 MB.");
+
+      e.target.value = "";
+
+      return;
+    }
+
+    setImage(file);
+
+    const previewUrl = URL.createObjectURL(file);
+
+    setImagePreview(previewUrl);
+  };
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
   /* ==========================================================
      AMBIL DATA SEKOLAH
   ========================================================== */
@@ -247,8 +301,6 @@ export default function Sekolah() {
       const response = await axios.get(`${repo}api/profile-sekolah`);
 
       const data = response?.data?.data;
-
-      console.log("Data sekolah:", data);
 
       if (!data) {
         throw new Error("Data profile sekolah tidak ditemukan.");
@@ -284,6 +336,15 @@ export default function Sekolah() {
 
   useEffect(() => {
     userProfile();
+    const html = document.documentElement;
+    const body = document.body;
+    const updateTheme = () => {
+      setIsDarkMode(
+        html.classList.contains("dark") || body.classList.contains("dark"),
+      );
+    };
+
+    updateTheme();
   }, [userProfile]);
 
   /* ==========================================================
@@ -323,46 +384,35 @@ export default function Sekolah() {
       return;
     }
 
+    const formData = new FormData();
+    formData.append("nama_sekolah", namaSekolah);
+    formData.append("akreditasi", akreditasi);
+    formData.append("no_telp", noTelp);
+    formData.append("alamat", alamat);
+    // ketika tidak upload gambar, maka tidak perlu mengirim field image_profile
+    if (image) {
+      formData.append("image_profile", image);
+    }
+
     try {
       setSaving(true);
 
-      const data = {
-        nama_sekolah: namaSekolah.trim(),
-        akreditasi,
-        no_telp: noTelp.trim(),
-        alamat_sekolah: alamat.trim(),
-      };
-
-      const response = await fetch(`${repositori}sekolah`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      console.log("Response update sekolah:", result);
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message || "Gagal memperbarui profile sekolah.",
-        );
-      }
+      const response = await api.patch(`profile-sekolah`, formData);
 
       setSekolah((prev) => ({
         ...prev,
         nama_sekolah: namaSekolah.trim(),
         akreditasi,
         no_telp: noTelp.trim(),
+        image_profile:
+          response?.data?.data?.image_profile || prev.image_profile,
         alamat_sekolah: alamat.trim(),
       }));
 
       await SwalReact.fire({
         icon: "success",
         title: "Berhasil",
-        text: result?.message || "Profile sekolah berhasil diperbarui.",
+        text: "Profile sekolah berhasil diperbarui.",
         confirmButtonText: "OK",
         confirmButtonColor: "#2563eb",
         background: theme.background,
@@ -664,6 +714,135 @@ export default function Sekolah() {
                       "
                     />
                   </FormField>
+
+                  {/* Image Profile */}
+                  {/* FOTO PROFILE */}
+                  <div>
+                    <label
+                      htmlFor="image_profile"
+                      className={`mb-2 block text-sm font-semibold ${
+                        isDarkMode ? "text-slate-200" : "text-slate-700"
+                      }`}
+                    >
+                      Foto Profile
+                    </label>
+
+                    <div
+                      className={`overflow-hidden rounded-xl border ${
+                        isDarkMode
+                          ? "border-slate-700 bg-slate-800"
+                          : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex min-h-52 items-center justify-center p-4">
+                        {imagePreview || sekolah?.image_profile ? (
+                          <img
+                            src={
+                              imagePreview ||
+                              `${repoimages}${sekolah.image_profile}`
+                            }
+                            alt="Preview profile"
+                            className="max-h-64 max-w-full rounded-xl object-contain shadow-sm"
+                          />
+                        ) : (
+                          <div className="py-8 text-center">
+                            <div
+                              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
+                                isDarkMode
+                                  ? "bg-blue-500/10 text-blue-400"
+                                  : "bg-blue-50 text-blue-500"
+                              }`}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-7 w-7"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M3 16.5V7.5A2.5 2.5 0 015.5 5h13A2.5 2.5 0 0121 7.5v9a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 16.5z"
+                                />
+
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M8 10.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM21 15l-4.5-4.5L7 20"
+                                />
+                              </svg>
+                            </div>
+
+                            <p
+                              className={`mt-3 text-sm font-medium ${
+                                isDarkMode ? "text-slate-300" : "text-slate-600"
+                              }`}
+                            >
+                              Belum ada foto
+                            </p>
+
+                            <p
+                              className={`mt-1 text-xs ${
+                                isDarkMode ? "text-slate-500" : "text-slate-400"
+                              }`}
+                            >
+                              PNG, JPG, JPEG atau WEBP · Maksimal 2 MB
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className={`border-t p-4 ${
+                          isDarkMode
+                            ? "border-slate-700 bg-slate-900"
+                            : "border-slate-200 bg-white"
+                        }`}
+                      >
+                        <input
+                          id="image_profile"
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/webp"
+                          onChange={onImageUpload}
+                          className={`block w-full text-sm ${
+                            isDarkMode
+                              ? "text-slate-400 file:bg-blue-500/10 file:text-blue-400 hover:file:bg-blue-500/20"
+                              : "text-slate-500 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          } file:mr-4 file:rounded-lg file:border-0 file:px-4 file:py-2 file:text-sm file:font-semibold`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* ERROR */}
+                    {error && (
+                      <div
+                        className={`mt-3 flex items-start gap-2 rounded-xl border px-4 py-3 text-sm ${
+                          isDarkMode
+                            ? "border-rose-900/60 bg-rose-950/40 text-rose-400"
+                            : "border-rose-100 bg-rose-50 text-rose-600"
+                        }`}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mt-0.5 h-5 w-5 shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12V15z"
+                          />
+                        </svg>
+
+                        <span>{error}</span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Alamat */}
                   <FormField id="alamat" label="Alamat Sekolah">
