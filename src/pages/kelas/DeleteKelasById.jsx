@@ -1,8 +1,6 @@
-import React from "react";
 import Swal from "sweetalert2";
-import Cookies from "js-cookie";
 import withReactContent from "sweetalert2-react-content";
-import repositori from "../../utils/repositories";
+import api from "../../utils/repositories";
 
 function DeleteKelasById({ id, getKelasHistory }) {
   // Delete data kelas
@@ -48,16 +46,7 @@ function DeleteKelasById({ id, getKelasHistory }) {
       .then(async (result) => {
         try {
           if (result.isConfirmed) {
-            const data = Cookies.get("authentication");
-            const token = data.split(",");
-
-            let response = await fetch(`${repositori}kelas/${id}`, {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token[0],
-              },
-            }).then((res) => res.json());
+            let response = await api.delete(`kelas/${id}`);
             console.log(response);
             templateModalSuccess.fire({
               icon: "success",

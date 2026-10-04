@@ -202,7 +202,7 @@ function Profile() {
 
     const formData = new FormData();
 
-    formData.append("name", name);
+    formData.append("nama", name);
     formData.append("jenis_kelamin", jenisKelamin);
     formData.append("no_hp", noHP);
     formData.append("alamat", alamat);

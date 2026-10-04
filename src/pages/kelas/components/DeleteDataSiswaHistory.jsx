@@ -1,24 +1,19 @@
-import React, { useState } from "react";
-import repositori from "../../../utils/repositories";
-import Cookies from "js-cookie";
+import { useState } from "react";
 
-function DeleteDataSiswaHistory({ id, getDataSiswaByKelas }) {
+import api from "../../../utils/repositories";
+
+function DeleteDataSiswaHistory({ id, nis, getDataSiswaByKelas }) {
   const [btnDelete, setBtnDelete] = useState(false);
 
   const deleteDataSiswaHistory = async () => {
     setBtnDelete(!btnDelete);
-    const data = Cookies.get("authentication");
-    const token = data.split(",");
+
     try {
-      let response = await fetch(`${repositori}siswa/kelas/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token[0],
-        },
-      }).then((res) => res.json());
+      let response = await api.delete(`siswa-kelas/${id}/${nis}`);
       console.log("delete siswa history", response);
-      getDataSiswaByKelas();
+      setTimeout(() => {
+        getDataSiswaByKelas();
+      }, 0.1);
     } catch (error) {
       console.log("error", error);
     }

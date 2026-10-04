@@ -168,6 +168,7 @@ function KelasById() {
             </div>
             <DeleteDataSiswaHistory
               id={row?.id}
+              nis={row?.nis}
               getDataSiswaByKelas={getDataSiswaByKelas}
             />
           </div>

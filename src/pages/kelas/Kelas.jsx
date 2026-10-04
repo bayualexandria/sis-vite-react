@@ -256,7 +256,7 @@ const KelasCard = ({ kelas }) => {
         </p>
 
         <h3 className="mt-1 truncate text-lg font-bold text-slate-800 dark:text-white">
-          {kelas.kelas}
+          {kelas.nama_kelas}
         </h3>
 
         <p className="mt-1 line-clamp-2 min-h-10 text-xs font-medium leading-5 text-slate-500 dark:text-slate-400">
@@ -277,7 +277,7 @@ const KelasCard = ({ kelas }) => {
           </div>
 
           <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">
-            {kelas.wali_kelas || "-"}
+            {kelas.name || "-"}
           </p>
         </div>
       </div>
