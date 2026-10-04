@@ -3,12 +3,10 @@ import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 
 import Main from "../../components/Main/Main";
-import AddDataGuru from "./modal/AddDataGuru";
-import DeleteGuruById from "./DeleteGuruById";
-import StatusById from "./modal/StatusById";
-import StatusUserVerified from "./modal/StatusUserVerified";
+import AddDataGuru from "../guru/modal/AddDataGuru";
+import DeleteGuruById from "../guru/DeleteGuruById";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
-import ShowDataTrashGuru from "./trash-data/ShowDataTrashGuru";
+import ShowDataTrashGuru from "../guru/trash-data/ShowDataTrashGuru";
 import api from "../../utils/repositories";
 
 /* =========================================================
@@ -262,8 +260,8 @@ const getDataTableStyles = (isDarkMode) => ({
    GURU
 ========================================================= */
 
-function Guru() {
-  const [guru, setGuru] = useState([]);
+function GuruMapel() {
+  const [guruMapel, setGuruMapel] = useState([]);
   const [search, setSearch] = useState("");
   const [pending, setPending] = useState(true);
 
@@ -316,18 +314,18 @@ function Guru() {
      GET DATA GURU
   ======================================================= */
 
-  const dataGuru = useCallback(async () => {
+  const dataMapel = useCallback(async () => {
     try {
       setPending(true);
 
-      const response = await api.get("guru/");
+      const response = await api.get("guru-mapel/");
 
       const data = response?.data?.data ?? [];
 
-      setGuru(Array.isArray(data) ? data : []);
+      setGuruMapel(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Gagal mengambil data guru:", error);
-      setGuru([]);
+      console.error("Gagal mengambil data mapel:", error);
+      setGuruMapel([]);
     } finally {
       setPending(false);
     }
@@ -338,8 +336,8 @@ function Guru() {
   ======================================================= */
 
   useEffect(() => {
-    dataGuru();
-  }, [dataGuru]);
+    dataMapel();
+  }, [dataMapel]);
 
   /* =======================================================
      FILTER DATA
@@ -349,25 +347,23 @@ function Guru() {
     const keyword = search.trim().toLowerCase();
 
     if (!keyword) {
-      return guru;
+      return guruMapel;
     }
 
-    return guru.filter((item) => {
-      const name = String(item?.name ?? "").toLowerCase();
+    return guruMapel.filter((item) => {
+      const nama = String(item?.nama ?? "").toLowerCase();
       const nip = String(item?.nip ?? "").toLowerCase();
-      const jenisKelamin = String(item?.jenis_kelamin ?? "").toLowerCase();
-      const noHp = String(item?.no_hp ?? "").toLowerCase();
-      const alamat = String(item?.alamat ?? "").toLowerCase();
+      const namamapel = String(item?.nama_mapel ?? "").toLowerCase();
+      const kodemapel = String(item?.kode_mapel ?? "").toLowerCase();
 
       return (
-        name.includes(keyword) ||
+        nama.includes(keyword) ||
         nip.includes(keyword) ||
-        jenisKelamin.includes(keyword) ||
-        noHp.includes(keyword) ||
-        alamat.includes(keyword)
+        kodemapel.includes(keyword) ||
+        namamapel.includes(keyword)
       );
     });
-  }, [guru, search]);
+  }, [guruMapel, search]);
 
   /* =======================================================
      RESET PAGINATION
@@ -433,26 +429,53 @@ function Guru() {
   const columns = useMemo(
     () => [
       {
-        name: "Nama Lengkap",
-        selector: (row) => row?.name ?? "-",
+        name: "Guru Mapel",
+        selector: (row) => row?.nama ?? "-",
         sortable: true,
-        width: "230px",
-
+        width: "250px",
         cell: (row) => {
-          const name = String(row?.name ?? "-");
+          const nama = String(row?.nama ?? "-");
+          const nip = String(row?.nip ?? "-");
+
           return (
             <div className="flex min-w-0 items-center gap-3 py-2">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-600 dark:bg-sky-950/50 dark:text-sky-400">
-                {name.charAt(0).toUpperCase()}
+                {nama.charAt(0).toUpperCase()}
               </div>
 
               <div className="min-w-0">
                 <p className="truncate font-medium text-slate-700 dark:text-slate-200">
-                  {name}
+                  {nama}
                 </p>
 
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  {row.status_user_name}
+                  {nip || "-"}
+                </p>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        name: "Nama Mapel",
+        selector: (row) => row?.nama_mapel ?? "-",
+        sortable: true,
+        width: "310px",
+
+        cell: (row) => {
+          const nama = String(row?.nama_mapel ?? "-");
+          const parts = row?.kode_mapel ? row.kode_mapel.split("-") : [];
+          const singkatan = parts.length >= 2 ? parts[1] : row?.kode_mapel;
+
+          return (
+            <div className="flex min-w-0 items-center gap-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-slate-700 dark:text-slate-200">
+                  {nama}
+                </p>
+
+                <p className="text-xs text-slate-400 dark:text-slate-500">
+                  {singkatan || "-"}
                 </p>
               </div>
             </div>
@@ -461,72 +484,29 @@ function Guru() {
       },
 
       {
-        name: "NIP",
-        selector: (row) => row?.nip ?? "-",
+        name: "Kode",
+        selector: (row) => row?.kode_mapel ?? "-",
         sortable: true,
         width: "155px",
 
         cell: (row) => (
           <span className="font-mono text-sm text-slate-600 dark:text-slate-300">
-            {row?.nip ?? "-"}
+            {row?.kode_mapel ?? "-"}
           </span>
         ),
       },
 
       {
-        name: "Jenis Kelamin",
-        selector: (row) => row?.jenis_kelamin ?? "-",
-        sortable: true,
-        width: "150px",
-
-        cell: (row) => (
-          <span className="text-sm text-slate-600 dark:text-slate-300">
-            {row?.jenis_kelamin ?? "-"}
-          </span>
-        ),
-      },
-
-      {
-        name: "No. Handphone",
-        selector: (row) => row?.no_hp ?? "-",
+        name: "Tahun Ajaran",
+        selector: (row) => row?.tahun_ajaran ?? "-",
         sortable: true,
         width: "155px",
 
         cell: (row) => (
-          <span className="text-sm text-slate-600 dark:text-slate-300">
-            {row?.no_hp ?? "-"}
+          <span className="font-mono text-sm text-slate-600 dark:text-slate-300">
+            {row?.tahun_ajaran ?? "-"}
           </span>
         ),
-      },
-
-      {
-        name: "Alamat",
-        selector: (row) => row?.alamat ?? "-",
-        sortable: true,
-        minWidth: "180px",
-
-        cell: (row) => (
-          <span
-            title={row?.alamat ?? "-"}
-            className="block max-w-[280px] truncate text-sm text-slate-500 dark:text-slate-400"
-          >
-            {row?.alamat ?? "-"}
-          </span>
-        ),
-      },
-
-      {
-        name: "Status",
-        cell: (row) => <StatusById row={row} dataGuru={dataGuru} />,
-        sortable: true,
-        width: "150px",
-      },
-
-      {
-        name: "User Status",
-        cell: (row) => <StatusUserVerified row={row} dataGuru={dataGuru} />,
-        sortable: true,
-        width: "150px",
       },
 
       {
@@ -537,7 +517,7 @@ function Guru() {
             {/* EDIT */}
 
             <Link
-              to={`/guru/${row?.nip}`}
+              to={`/guru/${row?.id}`}
               title="Edit data guru"
               className="
                 group flex h-8 w-8 items-center justify-center
@@ -567,7 +547,7 @@ function Guru() {
                 dark:hover:border-red-900 dark:hover:bg-red-950/40
               "
             >
-              <DeleteGuruById username={row?.nip} />
+              <DeleteGuruById username={row?.id} />
             </div>
           </div>
         ),
@@ -578,7 +558,7 @@ function Guru() {
         width: "100px",
       },
     ],
-    [dataGuru],
+    [dataMapel],
   );
 
   /* =======================================================
@@ -606,16 +586,16 @@ function Guru() {
                   <Icons.ChevronRight className="h-3.5 w-3.5" />
 
                   <span className="font-medium text-slate-600 dark:text-slate-300">
-                    Guru
+                    Guru Mata Pelajaran
                   </span>
                 </div>
 
                 <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
-                  Data Guru
+                  Data Guru Mata Pelajaran
                 </h1>
 
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Kelola informasi dan data guru sekolah.
+                  Kelola informasi dan data guru mata pelajaran sekolah.
                 </p>
               </div>
 
@@ -635,11 +615,11 @@ function Guru() {
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    Total Guru
+                    Total Mapel
                   </p>
 
                   <p className="text-lg font-bold text-slate-700 dark:text-white">
-                    {guru.length}
+                    {guruMapel.length}
                   </p>
                 </div>
               </div>
@@ -715,9 +695,9 @@ function Guru() {
                 {/* ACTIONS */}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <AddDataGuru dataGuru={dataGuru} />
+                  <AddDataGuru dataGuru={dataMapel} />
 
-                  <ExcelExport data={guru} fileName="Data Guru" />
+                  <ExcelExport data={guruMapel} fileName="Data Guru" />
 
                   <ShowDataTrashGuru />
                 </div>
@@ -939,4 +919,4 @@ function Guru() {
   );
 }
 
-export default Guru;
+export default GuruMapel;
