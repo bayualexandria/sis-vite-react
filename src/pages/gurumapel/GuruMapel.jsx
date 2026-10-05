@@ -3,11 +3,9 @@ import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 
 import Main from "../../components/Main/Main";
-import AddDataGuru from "../guru/modal/AddDataGuru";
 import DeleteGuruById from "../guru/DeleteGuruById";
-import ExcelExport from "../../components/laporan/excel/ExcelExport";
-import ShowDataTrashGuru from "../guru/trash-data/ShowDataTrashGuru";
 import api from "../../utils/repositories";
+import AddDataGuruMapel from "./modal/AddDataGuruMapel";
 
 /* =========================================================
    ICONS
@@ -622,6 +620,9 @@ function GuruMapel() {
                     {guruMapel.length}
                   </p>
                 </div>
+                <div className="row-full justify-center content-center flex flex-row">
+                  <AddDataGuruMapel dataGuruMapel={dataMapel} />
+                </div>
               </div>
             </div>
           </div>
@@ -690,16 +691,6 @@ function GuruMapel() {
                       <Icons.Close className="h-4 w-4" />
                     </button>
                   )}
-                </div>
-
-                {/* ACTIONS */}
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <AddDataGuru dataGuru={dataMapel} />
-
-                  <ExcelExport data={guruMapel} fileName="Data Guru" />
-
-                  <ShowDataTrashGuru />
                 </div>
               </div>
             </div>

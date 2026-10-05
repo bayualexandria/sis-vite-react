@@ -14,13 +14,13 @@ import {
   Siswa,
   Guru,
   Profile,
+  GuruMapel,
   Website,
   Absensi,
   KelasById,
   PageNotFound,
 } from "./pages/Index";
 import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
-import GuruMapel from "./pages/guru/GuruMapel";
 
 // Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
 const ROLES = {

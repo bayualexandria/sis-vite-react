@@ -15,6 +15,7 @@ import KelasById from "./kelas/KelasById";
 import Website from "./web/Website";
 import Absensi from "./absensi/Absensi";
 import PageNotFound from "./404/PageNotFound";
+import GuruMapel from "./gurumapel/GuruMapel";
 
 export {
   Sekolah,
@@ -34,4 +35,5 @@ export {
   Website,
   Absensi,
   PageNotFound,
+  GuruMapel,
 };
