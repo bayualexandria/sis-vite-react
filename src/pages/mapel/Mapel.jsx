@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 
 import Main from "../../components/Main/Main";
-import AddDataGuru from "../guru/modal/AddDataGuru";
 import DeleteGuruById from "../guru/DeleteGuruById";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
-import ShowDataTrashGuru from "../guru/trash-data/ShowDataTrashGuru";
 import api from "../../utils/repositories";
+import AddDataMapel from "./modal/AddDataMapel";
 
 /* =========================================================
    ICONS
@@ -257,11 +256,11 @@ const getDataTableStyles = (isDarkMode) => ({
 });
 
 /* =========================================================
-   GURU
+   MAPEL
 ========================================================= */
 
 function Mapel() {
-  const [guru, setGuru] = useState([]);
+  const [mapel, setMapel] = useState([]);
   const [search, setSearch] = useState("");
   const [pending, setPending] = useState(true);
 
@@ -322,10 +321,10 @@ function Mapel() {
 
       const data = response?.data?.data ?? [];
 
-      setGuru(Array.isArray(data) ? data : []);
+      setMapel(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Gagal mengambil data mapel:", error);
-      setGuru([]);
+      setMapel([]);
     } finally {
       setPending(false);
     }
@@ -347,10 +346,10 @@ function Mapel() {
     const keyword = search.trim().toLowerCase();
 
     if (!keyword) {
-      return guru;
+      return mapel;
     }
 
-    return guru.filter((item) => {
+    return mapel.filter((item) => {
       const nama = String(item?.nama ?? "").toLowerCase();
       const kode = String(item?.kode ?? "").toLowerCase();
       const deskripsi = String(item?.deskripsi ?? "").toLowerCase();
@@ -361,7 +360,7 @@ function Mapel() {
         deskripsi.includes(keyword)
       );
     });
-  }, [guru, search]);
+  }, [mapel, search]);
 
   /* =======================================================
      RESET PAGINATION
@@ -591,7 +590,7 @@ function Mapel() {
                   </p>
 
                   <p className="text-lg font-bold text-slate-700 dark:text-white">
-                    {guru.length}
+                    {mapel.length}
                   </p>
                 </div>
               </div>
@@ -667,11 +666,11 @@ function Mapel() {
                 {/* ACTIONS */}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <AddDataGuru dataGuru={dataMapel} />
+                  <AddDataMapel dataMapel={dataMapel} />
 
-                  <ExcelExport data={guru} fileName="Data Guru" />
+                  <ExcelExport data={mapel} fileName="Data Mata Pelajaran" />
 
-                  <ShowDataTrashGuru />
+                  {/* <ShowDataTrashMapel /> */}
                 </div>
               </div>
             </div>
