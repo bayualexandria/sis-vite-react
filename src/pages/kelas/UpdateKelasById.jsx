@@ -71,7 +71,6 @@ function UpdateKelasById({ id }) {
 
   const [kelasID, setKelasID] = useState("");
   const [waliKelas, setWaliKelas] = useState("");
-  const [semesterID, setSemesterID] = useState("");
 
   /* =========================================================
      OPEN / CLOSE MODAL
@@ -149,7 +148,9 @@ function UpdateKelasById({ id }) {
     try {
       setLoadingData(true);
 
-      const response = await api.get(`kelas/${id}`).then((res) => res.data);
+      const response = await api
+        .get(`ruang-kelas/${id}`)
+        .then((res) => res.data);
 
       if (response?.status === 404) {
         setGeneralError(response?.message || "Data kelas tidak ditemukan.");
@@ -158,18 +159,17 @@ function UpdateKelasById({ id }) {
 
       if (response?.status === 200) {
         const data = response?.data;
+        console.log("data updatedd", data[0]);
+        // Konversi ke String untuk mencegah ketidakcocokan tipe (Number vs String)
+        setKelasID(data[0]?.kelas_id ? String(data[0].kelas_id) : "");
 
-        setKelasID(data?.kelas_id ? String(data.kelas_id) : "");
-
-        setWaliKelas(
-          data?.guru_wali_id
-            ? String(data.guru_wali_id)
-            : data?.wali_kelas
-              ? String(data.wali_kelas)
-              : "",
+        // Cari data guru yang NIP-nya sama dengan NIP di data[0]
+        const matchedGuru = guru.find(
+          (g) => String(g.nip) === String(data[0]?.nip),
         );
 
-        setSemesterID(data?.semester_id ? String(data.semester_id) : "");
+        // Simpan ID guru yang ditemukan ke dalam state
+        setWaliKelas(matchedGuru ? String(matchedGuru.id) : "");
       }
     } catch (error) {
       console.error("Gagal mengambil data kelas:", error);
@@ -199,17 +199,16 @@ function UpdateKelasById({ id }) {
      DATA FORM
   ========================================================= */
 
-  const dataKelas = {
-    kelas_id: kelasID,
-    wali_kelas: waliKelas,
-    semester_id: semesterID,
-  };
+  const formData = new FormData();
+  formData.append("kelas_id", kelasID);
+  formData.append("guru_wali_id", waliKelas);
 
   /* =========================================================
      UPDATE DATA
   ========================================================= */
 
   const updateDataKelas = async (e) => {
+    console.log(waliKelas);
     e.preventDefault();
 
     if (loading) return;
@@ -220,7 +219,7 @@ function UpdateKelasById({ id }) {
 
     try {
       const response = await api
-        .put(`kelas/${id}`, dataKelas)
+        .patch(`ruang-kelas/${id}`, formData)
         .then((res) => res.data);
 
       /* ============================================
@@ -305,6 +304,18 @@ function UpdateKelasById({ id }) {
   ========================================================= */
 
   useEffect(() => {
+    if (dataKelasHistory && guru.length > 0) {
+      const currentNip = dataKelasHistory[0]?.nip;
+
+      // Temukan ID guru berdasarkan NIP dari data history
+      const foundGuru = guru.find((g) => String(g.nip) === String(currentNip));
+
+      if (foundGuru) {
+        setWaliKelas(String(foundGuru.id));
+      } else {
+        setWaliKelas("");
+      }
+    }
     const loadData = async () => {
       await Promise.all([getDataKelas(), getDataGuru(), dataKelasHistory()]);
     };
@@ -635,22 +646,14 @@ function UpdateKelasById({ id }) {
                     )}
 
                     {/* =========================================
-                        KELAS
-                    ========================================= */}
-
+    KELAS
+========================================= */}
                     <div className="space-y-2">
                       <label
                         htmlFor="kelas_id"
-                        className="
-                          block
-                          text-sm
-                          font-semibold
-                          text-slate-700
-                          dark:text-slate-200
-                        "
+                        className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
                       >
-                        Kelas
-                        <span className="ml-1 text-rose-500">*</span>
+                        Kelas <span className="ml-1 text-rose-500">*</span>
                       </label>
 
                       <div className="relative">
@@ -666,43 +669,13 @@ function UpdateKelasById({ id }) {
                             }));
                           }}
                           disabled={loading}
-                          className="
-                            w-full
-                            appearance-none
-                            rounded-xl
-                            border
-                            border-slate-300
-                            bg-white
-                            px-4
-                            py-3
-                            pr-10
-                            text-sm
-                            text-slate-700
-                            shadow-sm
-                            outline-none
-                            transition
-                            placeholder:text-slate-400
-                            hover:border-slate-400
-                            focus:border-sky-500
-                            focus:ring-4
-                            focus:ring-sky-500/10
-                            disabled:cursor-not-allowed
-                            disabled:bg-slate-100
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:border-slate-600
-                            dark:focus:border-sky-500
-                            dark:disabled:bg-slate-800/50
-                          "
+                          className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:focus:border-sky-500 dark:disabled:bg-slate-800/50"
                         >
                           <option value="">-- Pilih Kelas --</option>
 
                           {kelas.map((data) => (
-                            <option value={data.id} key={data.id}>
-                              {data.nama_kelas}
-                              {" | "}
-                              {data.jurusan}
+                            <option value={String(data.id)} key={data.id}>
+                              {data.nama_kelas} {" | "} {data.jurusan}
                             </option>
                           ))}
                         </select>
@@ -741,29 +714,20 @@ function UpdateKelasById({ id }) {
                               d="M12 9v3.75m0 3.75h.007v.008H12v-.008Z"
                             />
                           </svg>
-
                           {error.kelas_id}
                         </p>
                       )}
                     </div>
 
                     {/* =========================================
-                        WALI KELAS
-                    ========================================= */}
-
+    WALI KELAS
+========================================= */}
                     <div className="space-y-2">
                       <label
                         htmlFor="wali_kelas"
-                        className="
-                          block
-                          text-sm
-                          font-semibold
-                          text-slate-700
-                          dark:text-slate-200
-                        "
+                        className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
                       >
-                        Wali Kelas
-                        <span className="ml-1 text-rose-500">*</span>
+                        Wali Kelas <span className="ml-1 text-rose-500">*</span>
                       </label>
 
                       <div className="relative">
@@ -775,42 +739,20 @@ function UpdateKelasById({ id }) {
                             setWaliKelas(e.target.value);
                             setError((prev) => ({
                               ...prev,
-                              wali_kelas_id: "",
-                              wali_kelas: "",
+                              guru_wali_id: "",
                             }));
                           }}
                           disabled={loading}
-                          className="
-                            w-full
-                            appearance-none
-                            rounded-xl
-                            border
-                            border-slate-300
-                            bg-white
-                            px-4
-                            py-3
-                            pr-10
-                            text-sm
-                            text-slate-700
-                            shadow-sm
-                            outline-none
-                            transition
-                            focus:border-sky-500
-                            focus:ring-4
-                            focus:ring-sky-500/10
-                            disabled:cursor-not-allowed
-                            disabled:bg-slate-100
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:focus:border-sky-500
-                            dark:disabled:bg-slate-800/50
-                          "
+                          className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-500 dark:disabled:bg-slate-800/50"
                         >
                           <option value="">-- Pilih Wali Kelas --</option>
 
                           {guru.map((data) => (
-                            <option value={data.id} key={data.id}>
+                            /* Jika response dari API history menggunakan `nip`, sesuaikan option value ke `data.nip`. Jika menggunakan `id`, pastikan di history di-set `data.wali_kelas_id` atau `data.guru_id`. */
+                            <option
+                              value={String(data.nip || data.id)}
+                              key={data.id}
+                            >
                               {data.name}
                             </option>
                           ))}
@@ -850,7 +792,6 @@ function UpdateKelasById({ id }) {
                               d="M12 9v3.75m0 3.75h.007v.008H12v-.008Z"
                             />
                           </svg>
-
                           {error.wali_kelas_id || error.wali_kelas}
                         </p>
                       )}
