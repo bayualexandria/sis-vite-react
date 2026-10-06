@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import api from "../../utils/repositories";
@@ -31,6 +31,7 @@ const getErrorMessage = (error) => {
     "Terjadi kesalahan. Silakan coba lagi."
   );
 };
+
 const LoadingSpinner = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -91,124 +92,78 @@ function UpdateKelasById({ id }) {
   };
 
   /* =========================================================
-     GET DATA KELAS
+     FETCH ALL INITIAL DATA (SEQUENCE SAFE)
   ========================================================= */
 
-  const getDataKelas = async () => {
-    try {
-      const response = await api.get("kelas/").then((res) => res.data);
-
-      setKelas(response?.data || []);
-    } catch (error) {
-      console.error("Gagal mengambil data kelas:", error);
-
-      if (
-        error?.message === "Failed to fetch" ||
-        error?.code === "ERR_NETWORK"
-      ) {
-        templateModalSuccess.fire({
-          icon: "error",
-          title:
-            "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
-        });
-      }
-    }
-  };
-
-  /* =========================================================
-     GET DATA GURU
-  ========================================================= */
-
-  const getDataGuru = async () => {
-    try {
-      const response = await api.get("guru/").then((res) => res.data);
-
-      setGuru(response?.data || []);
-    } catch (error) {
-      console.error("Gagal mengambil data guru:", error);
-
-      if (
-        error?.message === "Failed to fetch" ||
-        error?.code === "ERR_NETWORK"
-      ) {
-        templateModalSuccess.fire({
-          icon: "error",
-          title:
-            "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
-        });
-      }
-    }
-  };
-
-  /* =========================================================
-     GET DATA KELAS BERDASARKAN ID
-  ========================================================= */
-
-  const dataKelasHistory = async () => {
+  const loadAllData = useCallback(async () => {
     try {
       setLoadingData(true);
+      setError({});
+      setGeneralError("");
 
-      const response = await api
+      // 1. Ambil data kelas & guru secara bersamaan terlebih dahulu
+      const [resKelas, resGuru] = await Promise.all([
+        api.get("kelas/").then((res) => res.data),
+        api.get("guru/").then((res) => res.data),
+      ]);
+
+      const listKelas = resKelas?.data || [];
+      const listGuru = resGuru?.data || [];
+
+      setKelas(listKelas);
+      setGuru(listGuru);
+
+      // 2. Ambil data histori ruang-kelas berdasarkan ID
+      const resDetail = await api
         .get(`ruang-kelas/${id}`)
         .then((res) => res.data);
 
-      if (response?.status === 404) {
-        setGeneralError(response?.message || "Data kelas tidak ditemukan.");
+      if (resDetail?.status === 404) {
+        setGeneralError(resDetail?.message || "Data kelas tidak ditemukan.");
         return;
       }
 
-      if (response?.status === 200) {
-        const data = response?.data;
-        console.log("data updatedd", data[0]);
-        // Konversi ke String untuk mencegah ketidakcocokan tipe (Number vs String)
-        setKelasID(data[0]?.kelas_id ? String(data[0].kelas_id) : "");
+      if (resDetail?.status === 200) {
+        const detailData = resDetail?.data?.[0];
 
-        // Cari data guru yang NIP-nya sama dengan NIP di data[0]
-        const matchedGuru = guru.find(
-          (g) => String(g.nip) === String(data[0]?.nip),
-        );
+        if (detailData) {
+          setKelasID(detailData.kelas_id ? String(detailData.kelas_id) : "");
 
-        // Simpan ID guru yang ditemukan ke dalam state
-        setWaliKelas(matchedGuru ? String(matchedGuru.id) : "");
+          // Set waliKelas menggunakan ID guru (sesuai backend request)
+          setWaliKelas(detailData.nip ? String(detailData.nip) : "");
+        }
       }
-    } catch (error) {
-      console.error("Gagal mengambil data kelas:", error);
+    } catch (err) {
+      console.error("Gagal mengambil data:", err);
 
-      if (
-        error?.message === "Failed to fetch" ||
-        error?.code === "ERR_NETWORK"
-      ) {
+      if (err?.message === "Failed to fetch" || err?.code === "ERR_NETWORK") {
         setGeneralError(
           "Koneksi ke server terputus. Mohon hubungi administrator server.",
         );
-
         templateModalSuccess.fire({
           icon: "error",
           title:
             "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
         });
       } else {
-        setGeneralError(getErrorMessage(error));
+        setGeneralError(getErrorMessage(err));
       }
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [id]);
 
-  /* =========================================================
-     DATA FORM
-  ========================================================= */
-
-  const formData = new FormData();
-  formData.append("kelas_id", kelasID);
-  formData.append("guru_wali_id", waliKelas);
+  useEffect(() => {
+    if (open) {
+      loadAllData();
+    }
+  }, [open, loadAllData]);
 
   /* =========================================================
      UPDATE DATA
   ========================================================= */
 
   const updateDataKelas = async (e) => {
-    console.log(waliKelas);
     e.preventDefault();
 
     if (loading) return;
@@ -217,32 +172,26 @@ function UpdateKelasById({ id }) {
     setError({});
     setGeneralError("");
 
+    const formData = new FormData();
+    formData.append("kelas_id", kelasID);
+    formData.append("guru_wali_id", waliKelas);
+    console.log(waliKelas + kelasID);
+
     try {
       const response = await api
         .patch(`ruang-kelas/${id}`, formData)
         .then((res) => res.data);
 
-      /* ============================================
-         VALIDATION ERROR
-      ============================================ */
-
       if (response?.status === 403) {
         const validationErrors = getValidationErrors(response);
-
         setError(validationErrors);
-
         setGeneralError(
           response?.message ||
             "Data yang dimasukkan belum sesuai. Silakan periksa kembali.",
         );
-
         setLoading(false);
         return;
       }
-
-      /* ============================================
-         SUCCESS
-      ============================================ */
 
       if (response?.status === 200) {
         setLoading(false);
@@ -254,22 +203,16 @@ function UpdateKelasById({ id }) {
         });
 
         window.location.href = "/kelas";
-
         return;
       }
-
-      /* ============================================
-         OTHER RESPONSE
-      ============================================ */
 
       setGeneralError(
         response?.message || "Data kelas gagal diperbarui. Silakan coba lagi.",
       );
-
       setLoading(false);
     } catch (error) {
+      console.log(error.response);
       console.error("Gagal memperbarui data kelas:", error);
-
       setLoading(false);
 
       if (
@@ -281,47 +224,19 @@ function UpdateKelasById({ id }) {
           title:
             "Koneksi ke server terputus! Mohon hubungi pihak administrator server.",
         });
-
         return;
       }
 
       const responseData = error?.response?.data;
-
       const validationErrors =
         responseData?.errors || responseData?.data?.errors || {};
-
       setError(validationErrors);
-
       setGeneralError(
         responseData?.message ||
           "Terjadi kesalahan saat memperbarui data kelas.",
       );
     }
   };
-
-  /* =========================================================
-     INITIAL DATA
-  ========================================================= */
-
-  useEffect(() => {
-    if (dataKelasHistory && guru.length > 0) {
-      const currentNip = dataKelasHistory[0]?.nip;
-
-      // Temukan ID guru berdasarkan NIP dari data history
-      const foundGuru = guru.find((g) => String(g.nip) === String(currentNip));
-
-      if (foundGuru) {
-        setWaliKelas(String(foundGuru.id));
-      } else {
-        setWaliKelas("");
-      }
-    }
-    const loadData = async () => {
-      await Promise.all([getDataKelas(), getDataGuru(), dataKelasHistory()]);
-    };
-
-    loadData();
-  }, [id]);
 
   /* =========================================================
      ESCAPE KEY + BODY SCROLL
@@ -337,7 +252,6 @@ function UpdateKelasById({ id }) {
     };
 
     document.addEventListener("keydown", handleEscape);
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -348,53 +262,17 @@ function UpdateKelasById({ id }) {
   }, [open, loading]);
 
   /* =========================================================
-     LOADING BUTTON
-  ========================================================= */
-
-  /* =========================================================
      RENDER
   ========================================================= */
 
   return (
     <>
-      {/* =====================================================
-          BUTTON EDIT
-      ===================================================== */}
-
       <button
         type="button"
         onClick={handleOpen}
         title="Ubah data kelas"
         aria-label="Ubah data kelas"
-        className="
-          group
-          inline-flex
-          h-9
-          w-9
-          items-center
-          justify-center
-          rounded-lg
-          border
-          border-sky-200
-          bg-sky-50
-          text-sky-600
-          shadow-sm
-          transition-all
-          duration-200
-          hover:border-sky-300
-          hover:bg-sky-100
-          hover:text-sky-700
-          hover:shadow-md
-          focus:outline-none
-          focus:ring-2
-          focus:ring-sky-500/30
-          dark:border-sky-800
-          dark:bg-sky-950/40
-          dark:text-sky-400
-          dark:hover:border-sky-700
-          dark:hover:bg-sky-900/50
-          dark:hover:text-sky-300
-        "
+        className="group inline-flex h-9 w-9 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-600 shadow-sm transition-all duration-200 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-400 dark:hover:border-sky-700 dark:hover:bg-sky-900/50 dark:hover:text-sky-300"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -412,23 +290,9 @@ function UpdateKelasById({ id }) {
         </svg>
       </button>
 
-      {/* =====================================================
-          TAILWIND MODAL
-      ===================================================== */}
-
       {open && (
         <div
-          className="
-            fixed
-            inset-0
-            z-[9999]
-            flex
-            items-center
-            justify-center
-            bg-slate-950/60
-            p-4
-            backdrop-blur-sm
-          "
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-labelledby="update-kelas-title"
@@ -439,63 +303,13 @@ function UpdateKelasById({ id }) {
           }}
         >
           <div
-            className="
-              relative
-              flex
-              max-h-[90vh]
-              w-full
-              max-w-xl
-              flex-col
-              overflow-hidden
-              rounded-2xl
-              border
-              border-slate-200
-              bg-white
-              shadow-2xl
-              shadow-slate-950/20
-              dark:border-slate-700
-              dark:bg-slate-900
-              dark:shadow-black/40
-            "
+            className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/20 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* =================================================
-                HEADER
-            ================================================= */}
-
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                border-b
-                border-slate-200
-                bg-gradient-to-r
-                from-sky-50
-                to-white
-                px-5
-                py-4
-                dark:border-slate-700
-                dark:from-sky-950/40
-                dark:to-slate-900
-              "
-            >
+            {/* HEADER */}
+            <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-sky-50 to-white px-5 py-4 dark:border-slate-700 dark:from-sky-950/40 dark:to-slate-900">
               <div className="flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-11
-                    w-11
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-sky-100
-                    text-sky-600
-                    dark:bg-sky-900/50
-                    dark:text-sky-400
-                  "
-                >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600 dark:bg-sky-900/50 dark:text-sky-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -511,20 +325,13 @@ function UpdateKelasById({ id }) {
                     />
                   </svg>
                 </div>
-
                 <div>
                   <h2
                     id="update-kelas-title"
-                    className="
-                      text-base
-                      font-bold
-                      text-slate-800
-                      dark:text-white
-                    "
+                    className="text-base font-bold text-slate-800 dark:text-white"
                   >
                     Ubah Data Kelas
                   </h2>
-
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                     Perbarui informasi kelas dan wali kelas
                   </p>
@@ -536,22 +343,7 @@ function UpdateKelasById({ id }) {
                 onClick={handleClose}
                 disabled={loading}
                 aria-label="Tutup modal"
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-lg
-                  text-slate-400
-                  transition
-                  hover:bg-slate-100
-                  hover:text-slate-700
-                  disabled:cursor-not-allowed
-                  disabled:opacity-50
-                  dark:hover:bg-slate-800
-                  dark:hover:text-slate-200
-                "
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -570,31 +362,14 @@ function UpdateKelasById({ id }) {
               </button>
             </div>
 
-            {/* =================================================
-                CONTENT
-            ================================================= */}
-
+            {/* CONTENT */}
             <div className="overflow-y-auto">
               {loadingData ? (
                 <div className="flex min-h-[300px] items-center justify-center px-5 py-8">
                   <div className="flex flex-col items-center gap-3">
-                    <div
-                      className="
-                        flex
-                        h-12
-                        w-12
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-sky-50
-                        text-sky-600
-                        dark:bg-sky-950/50
-                        dark:text-sky-400
-                      "
-                    >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 text-sky-600 dark:bg-sky-950/50 dark:text-sky-400">
                       <LoadingSpinner />
                     </div>
-
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                       Memuat data kelas...
                     </p>
@@ -603,29 +378,9 @@ function UpdateKelasById({ id }) {
               ) : (
                 <form onSubmit={updateDataKelas} className="flex flex-col">
                   <div className="space-y-5 px-5 py-6">
-                    {/* =========================================
-                        GENERAL ERROR
-                    ========================================= */}
-
+                    {/* GENERAL ERROR */}
                     {generalError && (
-                      <div
-                        className="
-                          flex
-                          items-start
-                          gap-3
-                          rounded-xl
-                          border
-                          border-rose-200
-                          bg-rose-50
-                          px-4
-                          py-3
-                          text-sm
-                          text-rose-700
-                          dark:border-rose-900/60
-                          dark:bg-rose-950/30
-                          dark:text-rose-300
-                        "
-                      >
+                      <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -640,14 +395,11 @@ function UpdateKelasById({ id }) {
                             d="M12 9v3.75m0 3.75h.007v.008H12v-.008ZM10.29 3.86l-7.02 12.16A1.875 1.875 0 0 0 4.894 18.8h14.212a1.875 1.875 0 0 0 1.624-2.78L13.71 3.86a1.875 1.875 0 0 0-3.42 0Z"
                           />
                         </svg>
-
                         <span>{generalError}</span>
                       </div>
                     )}
 
-                    {/* =========================================
-    KELAS
-========================================= */}
+                    {/* SELECT KELAS */}
                     <div className="space-y-2">
                       <label
                         htmlFor="kelas_id"
@@ -663,16 +415,12 @@ function UpdateKelasById({ id }) {
                           value={kelasID}
                           onChange={(e) => {
                             setKelasID(e.target.value);
-                            setError((prev) => ({
-                              ...prev,
-                              kelas_id: "",
-                            }));
+                            setError((prev) => ({ ...prev, kelas_id: "" }));
                           }}
                           disabled={loading}
                           className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:focus:border-sky-500 dark:disabled:bg-slate-800/50"
                         >
                           <option value="">-- Pilih Kelas --</option>
-
                           {kelas.map((data) => (
                             <option value={String(data.id)} key={data.id}>
                               {data.nama_kelas} {" | "} {data.jurusan}
@@ -719,9 +467,7 @@ function UpdateKelasById({ id }) {
                       )}
                     </div>
 
-                    {/* =========================================
-    WALI KELAS
-========================================= */}
+                    {/* SELECT WALI KELAS */}
                     <div className="space-y-2">
                       <label
                         htmlFor="wali_kelas"
@@ -740,15 +486,15 @@ function UpdateKelasById({ id }) {
                             setError((prev) => ({
                               ...prev,
                               guru_wali_id: "",
+                              wali_kelas_id: "",
+                              wali_kelas: "",
                             }));
                           }}
                           disabled={loading}
                           className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-500 dark:disabled:bg-slate-800/50"
                         >
                           <option value="">-- Pilih Wali Kelas --</option>
-
                           {guru.map((data) => (
-                            /* Jika response dari API history menggunakan `nip`, sesuaikan option value ke `data.nip`. Jika menggunakan `id`, pastikan di history di-set `data.wali_kelas_id` atau `data.guru_id`. */
                             <option
                               value={String(data.nip || data.id)}
                               key={data.id}
@@ -776,7 +522,9 @@ function UpdateKelasById({ id }) {
                         </div>
                       </div>
 
-                      {(error?.wali_kelas_id || error?.wali_kelas) && (
+                      {(error?.wali_kelas_id ||
+                        error?.wali_kelas ||
+                        error?.guru_wali_id) && (
                         <p className="flex items-center gap-1 text-xs font-medium text-rose-500">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -792,62 +540,21 @@ function UpdateKelasById({ id }) {
                               d="M12 9v3.75m0 3.75h.007v.008H12v-.008Z"
                             />
                           </svg>
-                          {error.wali_kelas_id || error.wali_kelas}
+                          {error.wali_kelas_id ||
+                            error.wali_kelas ||
+                            error.guru_wali_id}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  {/* =========================================
-                      FOOTER BUTTON
-                  ========================================= */}
-
-                  <div
-                    className="
-                      flex
-                      flex-col-reverse
-                      gap-2
-                      border-t
-                      border-slate-200
-                      bg-slate-50
-                      px-5
-                      py-4
-                      sm:flex-row
-                      sm:justify-end
-                      dark:border-slate-700
-                      dark:bg-slate-800/50
-                    "
-                  >
+                  {/* FOOTER BUTTONS */}
+                  <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-800/50">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="
-                        inline-flex
-                        h-10
-                        items-center
-                        justify-center
-                        rounded-xl
-                        border
-                        border-slate-300
-                        bg-white
-                        px-5
-                        text-sm
-                        font-semibold
-                        text-slate-700
-                        shadow-sm
-                        transition
-                        hover:bg-slate-100
-                        focus:outline-none
-                        focus:ring-4
-                        focus:ring-slate-500/10
-                        disabled:cursor-not-allowed
-                        disabled:opacity-50
-                        dark:border-slate-600
-                        dark:bg-slate-800
-                        dark:text-slate-200
-                        dark:hover:bg-slate-700
-                      "
+                      className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                       Batal
                     </button>
@@ -855,29 +562,7 @@ function UpdateKelasById({ id }) {
                     <button
                       type="submit"
                       disabled={loading || loadingData}
-                      className="
-                        inline-flex
-                        h-10
-                        min-w-[130px]
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-xl
-                        bg-sky-600
-                        px-5
-                        text-sm
-                        font-semibold
-                        text-white
-                        shadow-sm
-                        shadow-sky-600/20
-                        transition
-                        hover:bg-sky-700
-                        focus:outline-none
-                        focus:ring-4
-                        focus:ring-sky-500/20
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                      "
+                      className="inline-flex h-10 min-w-[130px] items-center justify-center gap-2 rounded-xl bg-sky-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {loading ? (
                         <>
@@ -885,24 +570,7 @@ function UpdateKelasById({ id }) {
                           <span>Menyimpan...</span>
                         </>
                       ) : (
-                        <>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            stroke="currentColor"
-                            className="h-4 w-4"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 12.75 9.75 17.5 19 7.75"
-                            />
-                          </svg>
-
-                          <span>Simpan Perubahan</span>
-                        </>
+                        "Simpan Perubahan"
                       )}
                     </button>
                   </div>

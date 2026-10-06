@@ -185,7 +185,7 @@ function UpdateDataGuru() {
       const response = await api.patch(`guru/${nip}`, formData);
 
       if (response.status === 200 || response?.data?.status === 200) {
-         const isDarkMode = document.documentElement.classList.contains("dark");
+        const isDarkMode = document.documentElement.classList.contains("dark");
         await Swal.fire({
           icon: "success",
           title: "Berhasil!",

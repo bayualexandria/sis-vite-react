@@ -13,6 +13,6 @@ export default defineConfig({
   // Tambahkan base pada folder project ketika mau di build contoh "base="/sis/"
   server: {
     host: true,
-    allowedHosts: ["localhost", "sis.dev-coding.web.id", "192.168.88.102"],
+    allowedHosts: ["localhost"],
   },
 });

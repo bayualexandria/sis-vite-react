@@ -7,6 +7,7 @@ import DeleteGuruById from "../guru/DeleteGuruById";
 import ExcelExport from "../../components/laporan/excel/ExcelExport";
 import api from "../../utils/repositories";
 import AddDataMapel from "./modal/AddDataMapel";
+import UpdatedDataMapel from "./modal/UpdatedDataMapel";
 
 /* =========================================================
    ICONS
@@ -487,23 +488,7 @@ function Mapel() {
           <div className="flex items-center gap-2">
             {/* EDIT */}
 
-            <Link
-              to={`/guru/${row?.id}`}
-              title="Edit data guru"
-              className="
-                group flex h-8 w-8 items-center justify-center
-                rounded-lg border border-slate-200 bg-white
-                text-slate-500 shadow-sm
-                transition-all duration-200
-                hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600
-                dark:border-slate-700 dark:bg-slate-800
-                dark:text-slate-400
-                dark:hover:border-sky-800 dark:hover:bg-sky-950/50
-                dark:hover:text-sky-400
-              "
-            >
-              <Icons.Edit className="h-4 w-4 transition-transform group-hover:scale-110" />
-            </Link>
+            <UpdatedDataMapel dataMapel={dataMapel} data={row} />
 
             {/* DELETE */}
 
