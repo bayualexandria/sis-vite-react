@@ -534,7 +534,7 @@ function Kelas() {
         right: true,
         cell: (row) => (
           <div className="flex items-center gap-2">
-            <UpdateKelasById id={row.id} />
+            <UpdateKelasById id={row.id} getKelasHistory={getKelasHistory} />
 
             <DeleteKelasById id={row.id} getKelasHistory={getKelasHistory} />
           </div>

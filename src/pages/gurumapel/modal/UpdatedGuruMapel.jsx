@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
-import api from "../../utils/repositories";
+import api from "../../../utils/repositories";
 
 const templateModalSuccess = withReactContent(Swal).mixin({
   customClass: {
@@ -58,7 +58,8 @@ const getValidationErrors = (response) => {
   );
 };
 
-function UpdateKelasById({ id, getKelasHistory }) {
+function UpdateGuruMapel({ id, dataGuruMapel }) {
+  console.log(id);
   const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -67,10 +68,10 @@ function UpdateKelasById({ id, getKelasHistory }) {
   const [error, setError] = useState({});
   const [generalError, setGeneralError] = useState("");
 
-  const [kelas, setKelas] = useState([]);
+  const [mapel, setMapel] = useState([]);
   const [guru, setGuru] = useState([]);
 
-  const [kelasID, setKelasID] = useState("");
+  const [mapelID, setMapelID] = useState("");
   const [waliKelas, setWaliKelas] = useState("");
 
   /* =========================================================
@@ -101,36 +102,43 @@ function UpdateKelasById({ id, getKelasHistory }) {
       setError({});
       setGeneralError("");
 
-      // 1. Ambil data kelas & guru secara bersamaan terlebih dahulu
+      // 1. Ambil data mapel & guru secara bersamaan terlebih dahulu
       const [resKelas, resGuru] = await Promise.all([
-        api.get("kelas/").then((res) => res.data),
+        api.get("mapel/").then((res) => res.data),
         api.get("guru/").then((res) => res.data),
       ]);
 
       const listKelas = resKelas?.data || [];
       const listGuru = resGuru?.data || [];
 
-      setKelas(listKelas);
+      setMapel(listKelas);
       setGuru(listGuru);
 
       // 2. Ambil data histori ruang-kelas berdasarkan ID
       const resDetail = await api
-        .get(`ruang-kelas/${id}`)
+        .get(`guru-mapel/${id}`)
         .then((res) => res.data);
 
       if (resDetail?.status === 404) {
-        setGeneralError(resDetail?.message || "Data kelas tidak ditemukan.");
+        setGeneralError(
+          resDetail?.message || "Data guru mapel tidak ditemukan.",
+        );
         return;
       }
+      console.log("updated data", resDetail);
 
       if (resDetail?.status === 200) {
-        const detailData = resDetail?.data?.[0];
+        const detailData = resDetail?.data;
 
         if (detailData) {
-          setKelasID(detailData.kelas_id ? String(detailData.kelas_id) : "");
+          setMapelID(
+            detailData.mata_pelajaran_id
+              ? String(detailData.mata_pelajaran_id)
+              : "",
+          );
 
           // Set waliKelas menggunakan ID guru (sesuai backend request)
-          setWaliKelas(detailData.nip ? String(detailData.nip) : "");
+          setWaliKelas(detailData.guru_id ? String(detailData.guru_id) : "");
         }
       }
     } catch (err) {
@@ -173,13 +181,13 @@ function UpdateKelasById({ id, getKelasHistory }) {
     setGeneralError("");
 
     const formData = new FormData();
-    formData.append("kelas_id", kelasID);
-    formData.append("guru_wali_id", waliKelas);
-    console.log(waliKelas + kelasID);
+    formData.append("mata_pelajaran_id", mapelID);
+    formData.append("guru_id", waliKelas);
+    console.log(waliKelas + mapelID);
 
     try {
       const response = await api
-        .patch(`ruang-kelas/${id}`, formData)
+        .patch(`guru-mapel/${id}`, formData)
         .then((res) => res.data);
 
       if (response?.status === 403) {
@@ -199,22 +207,23 @@ function UpdateKelasById({ id, getKelasHistory }) {
 
         await templateModalSuccess.fire({
           icon: "success",
-          title: response?.message || "Data kelas berhasil diperbarui.",
+          title: response?.message || "Data guru mapel berhasil diperbarui.",
         });
 
-        if (getKelasHistory) {
-          await getKelasHistory();
+        if (dataGuruMapel) {
+          await dataGuruMapel();
         }
         return;
       }
 
       setGeneralError(
-        response?.message || "Data kelas gagal diperbarui. Silakan coba lagi.",
+        response?.message ||
+          "Data guru mapel gagal diperbarui. Silakan coba lagi.",
       );
       setLoading(false);
     } catch (error) {
       console.log(error.response);
-      console.error("Gagal memperbarui data kelas:", error);
+      console.error("Gagal memperbarui data guru mapel:", error);
       setLoading(false);
 
       if (
@@ -235,7 +244,7 @@ function UpdateKelasById({ id, getKelasHistory }) {
       setError(validationErrors);
       setGeneralError(
         responseData?.message ||
-          "Terjadi kesalahan saat memperbarui data kelas.",
+          "Terjadi kesalahan saat memperbarui data guru mapel.",
       );
     }
   };
@@ -272,8 +281,8 @@ function UpdateKelasById({ id, getKelasHistory }) {
       <button
         type="button"
         onClick={handleOpen}
-        title="Ubah data kelas"
-        aria-label="Ubah data kelas"
+        title="Ubah data guru mapel"
+        aria-label="Ubah data guru mapel"
         className="group inline-flex h-9 w-9 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-600 shadow-sm transition-all duration-200 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-400 dark:hover:border-sky-700 dark:hover:bg-sky-900/50 dark:hover:text-sky-300"
       >
         <svg
@@ -332,7 +341,7 @@ function UpdateKelasById({ id, getKelasHistory }) {
                     id="update-kelas-title"
                     className="text-base font-bold text-slate-800 dark:text-white"
                   >
-                    Ubah Data Kelas
+                    Ubah Data Guru Mapel
                   </h2>
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                     Perbarui informasi kelas dan wali kelas
@@ -373,7 +382,7 @@ function UpdateKelasById({ id, getKelasHistory }) {
                       <LoadingSpinner />
                     </div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                      Memuat data kelas...
+                      Memuat data guru mapel...
                     </p>
                   </div>
                 </div>
@@ -407,25 +416,28 @@ function UpdateKelasById({ id, getKelasHistory }) {
                         htmlFor="kelas_id"
                         className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
                       >
-                        Kelas <span className="ml-1 text-rose-500">*</span>
+                        Mapel <span className="ml-1 text-rose-500">*</span>
                       </label>
 
                       <div className="relative">
                         <select
-                          name="kelas_id"
-                          id="kelas_id"
-                          value={kelasID}
+                          name="mata_pelajaran_id"
+                          id="mata_pelajaran_id"
+                          value={mapelID}
                           onChange={(e) => {
-                            setKelasID(e.target.value);
-                            setError((prev) => ({ ...prev, kelas_id: "" }));
+                            setMapelID(e.target.value);
+                            setError((prev) => ({
+                              ...prev,
+                              mata_pelajaran_id: "",
+                            }));
                           }}
                           disabled={loading}
                           className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:focus:border-sky-500 dark:disabled:bg-slate-800/50"
                         >
                           <option value="">-- Pilih Kelas --</option>
-                          {kelas.map((data) => (
+                          {mapel.map((data) => (
                             <option value={String(data.id)} key={data.id}>
-                              {data.nama_kelas} {" | "} {data.jurusan}
+                              {data.kode} {" | "} {data.nama}
                             </option>
                           ))}
                         </select>
@@ -448,7 +460,7 @@ function UpdateKelasById({ id, getKelasHistory }) {
                         </div>
                       </div>
 
-                      {error?.kelas_id && (
+                      {error?.mata_pelajaran_id && (
                         <p className="flex items-center gap-1 text-xs font-medium text-rose-500">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -480,16 +492,14 @@ function UpdateKelasById({ id, getKelasHistory }) {
 
                       <div className="relative">
                         <select
-                          name="wali_kelas"
-                          id="wali_kelas"
+                          name="guru_id"
+                          id="guru_id"
                           value={waliKelas}
                           onChange={(e) => {
                             setWaliKelas(e.target.value);
                             setError((prev) => ({
                               ...prev,
-                              guru_wali_id: "",
-                              wali_kelas_id: "",
-                              wali_kelas: "",
+                              guru_id: "",
                             }));
                           }}
                           disabled={loading}
@@ -497,11 +507,8 @@ function UpdateKelasById({ id, getKelasHistory }) {
                         >
                           <option value="">-- Pilih Wali Kelas --</option>
                           {guru.map((data) => (
-                            <option
-                              value={String(data.nip || data.id)}
-                              key={data.id}
-                            >
-                              {data.name}
+                            <option value={String(data.id)} key={data.id}>
+                              {data.name} | {data.nip}
                             </option>
                           ))}
                         </select>
@@ -586,4 +593,4 @@ function UpdateKelasById({ id, getKelasHistory }) {
   );
 }
 
-export default UpdateKelasById;
+export default UpdateGuruMapel;

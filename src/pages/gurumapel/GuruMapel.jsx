@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import DataTable from "react-data-table-component";
 
 import Main from "../../components/Main/Main";
-import DeleteGuruById from "../guru/DeleteGuruById";
 import api from "../../utils/repositories";
 import AddDataGuruMapel from "./modal/AddDataGuruMapel";
+import UpdateGuruMapel from "./modal/UpdatedGuruMapel";
+import DeleteDataGuruMapel from "./modal/DeleteDataGuruMapel";
 
 /* =========================================================
    ICONS
@@ -319,6 +320,7 @@ function GuruMapel() {
       const response = await api.get("guru-mapel/");
 
       const data = response?.data?.data ?? [];
+      console.log(data);
 
       setGuruMapel(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -514,23 +516,7 @@ function GuruMapel() {
           <div className="flex items-center gap-2">
             {/* EDIT */}
 
-            <Link
-              to={`/guru/${row?.id}`}
-              title="Edit data guru"
-              className="
-                group flex h-8 w-8 items-center justify-center
-                rounded-lg border border-slate-200 bg-white
-                text-slate-500 shadow-sm
-                transition-all duration-200
-                hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600
-                dark:border-slate-700 dark:bg-slate-800
-                dark:text-slate-400
-                dark:hover:border-sky-800 dark:hover:bg-sky-950/50
-                dark:hover:text-sky-400
-              "
-            >
-              <Icons.Edit className="h-4 w-4 transition-transform group-hover:scale-110" />
-            </Link>
+            <UpdateGuruMapel id={row.id} dataGuruMapel={dataMapel} />
 
             {/* DELETE */}
 
@@ -545,7 +531,7 @@ function GuruMapel() {
                 dark:hover:border-red-900 dark:hover:bg-red-950/40
               "
             >
-              <DeleteGuruById username={row?.id} />
+              <DeleteDataGuruMapel id={row?.id} dataGuruMapel={dataMapel} />
             </div>
           </div>
         ),
@@ -717,13 +703,13 @@ function GuruMapel() {
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
                       {search
                         ? "Data guru tidak ditemukan"
-                        : "Belum ada data guru"}
+                        : "Belum ada data guru mapel"}
                     </p>
 
                     <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                       {search
                         ? "Coba gunakan kata kunci pencarian lain."
-                        : "Data guru akan muncul di sini."}
+                        : "Data guru mapel akan muncul di sini."}
                     </p>
                   </div>
                 }
