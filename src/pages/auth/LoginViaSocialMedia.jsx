@@ -81,7 +81,7 @@ function LoginViaSocialMedia() {
       {user && <Navigate to="/home" replace={true} />}
       <div className="flex flex-col items-center justify-center">
         <GoogleOAuthProvider
-          clientId="204787363979-fhhfn04ib0sbbl6pfls7v5it4df33atb.apps.googleusercontent.com"
+          clientId="204787363979-snbgjdrfk5fe01pmv980rk794or1057l.apps.googleusercontent.com"
           buttonText=""
         >
           {loading ? (
