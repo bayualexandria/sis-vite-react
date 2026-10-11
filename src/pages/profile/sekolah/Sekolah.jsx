@@ -664,9 +664,7 @@ export default function Sekolah() {
                         <option value="B">B</option>
                         <option value="C">C</option>
 
-                        <option value="Belum Terakreditasi">
-                          Belum Terakreditasi
-                        </option>
+                        <option value="-">Belum Terakreditasi</option>
                       </select>
 
                       <svg

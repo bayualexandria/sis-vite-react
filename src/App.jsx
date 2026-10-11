@@ -21,6 +21,7 @@ import {
   PageNotFound,
 } from "./pages/Index";
 import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
+import GuruMapelById from "./pages/gurumapel/GuruMapelById";
 
 // Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
 const ROLES = {
@@ -188,6 +189,16 @@ function App() {
           <PrivateRoute>
             <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.GURU]}>
               <GuruMapel />
+            </RoleRoute>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/guru-mapel/:id"
+        element={
+          <PrivateRoute>
+            <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.GURU]}>
+              <GuruMapelById />
             </RoleRoute>
           </PrivateRoute>
         }
