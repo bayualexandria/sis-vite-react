@@ -320,7 +320,7 @@ function GuruMapel() {
       const response = await api.get("guru-mapel/");
 
       const data = response?.data?.data ?? [];
-      console.log(data);
+      console.log("guru mapel", data);
 
       setGuruMapel(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -344,13 +344,49 @@ function GuruMapel() {
   ======================================================= */
 
   const filteredGuru = useMemo(() => {
+    let data = guruMapel;
+
+    // Ambil data dari localStorage dan bersihkan dari tanda kutip ekstra
+    let currentUserId = localStorage.getItem("id_user");
+    let currentUsername = localStorage.getItem("username");
+
+    if (!currentUserId || !currentUsername) {
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+      currentUserId = currentUserId || userData?.id_user || userData?.id;
+      currentUsername = currentUsername || userData?.username || userData?.nip;
+    }
+
+    const userIdStr = String(currentUserId ?? "")
+      .replace(/["']/g, "")
+      .trim();
+    const usernameStr = String(currentUsername ?? "")
+      .replace(/["']/g, "")
+      .trim()
+      .toLowerCase();
+
+    // Debugging
+    console.log("--> ID User Bersih:", userIdStr);
+    console.log("--> Username Bersih:", usernameStr);
+
+    // Jika id_user == 3, filter berdasarkan NIP == username
+    if (userIdStr === "3" || userIdStr === "2") {
+      data = data.filter((item) => {
+        const itemNip = String(item?.nip ?? "")
+          .replace(/["']/g, "")
+          .trim()
+          .toLowerCase();
+        return itemNip === usernameStr;
+      });
+      console.log("--> Data Setelah Difilter:", data);
+    }
+
     const keyword = search.trim().toLowerCase();
 
     if (!keyword) {
-      return guruMapel;
+      return data;
     }
 
-    return guruMapel.filter((item) => {
+    return data.filter((item) => {
       const nama = String(item?.nama ?? "").toLowerCase();
       const nip = String(item?.nip ?? "").toLowerCase();
       const namamapel = String(item?.nama_mapel ?? "").toLowerCase();
@@ -589,14 +625,13 @@ function GuruMapel() {
       <div className="min-h-screen bg-slate-100 pt-[76px] dark:bg-slate-950 lg:ml-64">
         <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* =================================================
-              HEADER
-          ================================================= */}
+    HEADER
+================================================= */}
 
           <div className="mb-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 {/* Breadcrumb */}
-
                 <div className="mb-2 flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
                   <Link to="/" className="transition hover:text-sky-500">
                     Dashboard
@@ -618,15 +653,14 @@ function GuruMapel() {
                 </p>
               </div>
 
-              {/* TOTAL GURU */}
-
+              {/* TOTAL MAPEL */}
               <div
                 className="
-                  flex items-center gap-3 rounded-xl
-                  border border-slate-200 bg-white px-4 py-3
-                  shadow-sm
-                  dark:border-slate-800 dark:bg-slate-900
-                "
+        flex items-center gap-3 rounded-xl
+        border border-slate-200 bg-white px-4 py-3
+        shadow-sm
+        dark:border-slate-800 dark:bg-slate-900
+      "
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-50 text-sky-600 dark:bg-sky-950/50 dark:text-sky-400">
                   <Icons.Users className="h-5 w-5" />
@@ -638,10 +672,11 @@ function GuruMapel() {
                   </p>
 
                   <p className="text-lg font-bold text-slate-700 dark:text-white">
-                    {guruMapel.length}
+                    {filteredGuru.length}
                   </p>
                 </div>
-                <div className="row-full justify-center content-center flex flex-row">
+
+                <div className="row-full justify-center content-center flex flex-row ml-2">
                   <AddDataGuruMapel dataGuruMapel={dataMapel} />
                 </div>
               </div>
@@ -649,35 +684,137 @@ function GuruMapel() {
           </div>
 
           {/* =================================================
-              MAIN CARD
+              KONDISI TAMPILAN: CARD (jika id_user == 3) vs TABEL
           ================================================= */}
+          {localStorage.getItem("id_user") == 3 ||
+          localStorage.getItem("id_user") == 2 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {pending ? (
+                <div className="col-span-full flex min-h-[250px] w-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Memuat data...
+                  </p>
+                </div>
+              ) : paginatedGuru.length > 0 ? (
+                paginatedGuru.map((row) => {
+                  const nama = String(row?.nama ?? "-");
+                  const nip = String(row?.nip ?? "-");
+                  const namaMapel = String(row?.nama_mapel ?? "-");
+                  const kodeMapel = String(row?.kode_mapel ?? "-");
+                  const tahunAjaran = String(row?.tahun_ajaran ?? "-");
 
-          <div
-            className="
-              overflow-hidden rounded-2xl border
-              border-slate-200 bg-white shadow-sm
-              dark:border-slate-800 dark:bg-slate-900
-            "
-          >
-            {/* =================================================
-                TOOLBAR
+                  return (
+                    <div
+                      key={row.id}
+                      className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-600 dark:bg-sky-950/50 dark:text-sky-400">
+                              {nama.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="truncate font-semibold text-slate-800 dark:text-white">
+                                {nama}
+                              </h3>
+                              <p className="text-xs text-slate-400 dark:text-slate-500">
+                                NIP: {nip}
+                              </p>
+                            </div>
+                          </div>
+                          <Link
+                            to={`${row.id}`}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-sky-500 transition hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-sky-950/40"
+                            title="Lihat kelas"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.7"
+                              stroke="currentColor"
+                              className="h-4 w-4"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25"
+                              />
+                            </svg>
+                          </Link>
+                        </div>
+
+                        <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                          <div>
+                            <span className="text-xs text-slate-400 dark:text-slate-500">
+                              Mata Pelajaran:
+                            </span>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                              {namaMapel}
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-xs text-slate-400 dark:text-slate-500">
+                                Kode:
+                              </span>
+                              <p className="font-mono text-xs text-slate-600 dark:text-slate-300">
+                                {kodeMapel}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs text-slate-400 dark:text-slate-500">
+                                Tahun Ajaran:
+                              </span>
+                              <p className="font-mono text-xs text-slate-600 dark:text-slate-300">
+                                {tahunAjaran}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-full flex min-h-[250px] w-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                    <Icons.Database className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    Belum ada data guru mapel untuk NIP Anda
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              className="
+            overflow-hidden rounded-2xl border
+            border-slate-200 bg-white shadow-sm
+            dark:border-slate-800 dark:bg-slate-900
+          "
+            >
+              {/* =================================================
+              TOOLBAR
             ================================================= */}
 
-            <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800 lg:px-6">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                {/* SEARCH */}
+              <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800 lg:px-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  {/* SEARCH */}
 
-                <div className="relative w-full lg:max-w-md">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                    <Icons.Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />
-                  </div>
+                  <div className="relative w-full lg:max-w-md">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                      <Icons.Search className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+                    </div>
 
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Cari nama, NIP, no. HP..."
-                    className="
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Cari nama, NIP, no. HP..."
+                      className="
                       h-10 w-full rounded-lg
                       border border-slate-200
                       bg-slate-50 pl-10 pr-10
@@ -695,236 +832,239 @@ function GuruMapel() {
                       dark:focus:bg-slate-800
                       dark:focus:ring-sky-950/50
                     "
-                  />
+                    />
 
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch("")}
-                      className="
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="
                         absolute right-3 top-1/2
                         -translate-y-1/2 rounded-md p-1
                         text-slate-400 transition
                         hover:bg-slate-200 hover:text-slate-600
                         dark:hover:bg-slate-700 dark:hover:text-slate-200
                       "
-                    >
-                      <Icons.Close className="h-4 w-4" />
-                    </button>
-                  )}
+                      >
+                        <Icons.Close className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
+              {/* =================================================
+              TABLE
+          ================================================= */}
 
-            <div className="w-full overflow-hidden">
-              <DataTable
-                columns={columns}
-                data={paginatedGuru}
-                progressPending={pending}
-                highlightOnHover
-                responsive
-                customStyles={dataTableStyles}
-                persistTableHead
-                noDataComponent={
-                  <div className="flex min-h-[250px] w-full flex-col items-center justify-center">
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-                      <Icons.Database className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+              <div className="w-full overflow-hidden">
+                <DataTable
+                  columns={columns}
+                  data={paginatedGuru}
+                  progressPending={pending}
+                  highlightOnHover
+                  responsive
+                  customStyles={dataTableStyles}
+                  persistTableHead
+                  noDataComponent={
+                    <div className="flex min-h-[250px] w-full flex-col items-center justify-center">
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                        <Icons.Database className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                      </div>
+
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        {search
+                          ? "Data guru tidak ditemukan"
+                          : "Belum ada data guru mapel"}
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                        {search
+                          ? "Coba gunakan kata kunci pencarian lain."
+                          : "Data guru mapel akan muncul di sini."}
+                      </p>
                     </div>
+                  }
+                />
+              </div>
 
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                      {search
-                        ? "Data guru tidak ditemukan"
-                        : "Belum ada data guru mapel"}
-                    </p>
+              {/* =================================================
+              PAGINATION
+          ================================================= */}
 
-                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                      {search
-                        ? "Coba gunakan kata kunci pencarian lain."
-                        : "Data guru mapel akan muncul di sini."}
-                    </p>
-                  </div>
-                }
-              />
-            </div>
+              {!pending && totalRows > 0 && (
+                <div
+                  className="
+                border-t border-slate-200
+                bg-white px-5 py-4
+                dark:border-slate-800 dark:bg-slate-900
+                lg:px-6
+              "
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    {/* INFO */}
 
-            {/* =================================================
-                PAGINATION
-            ================================================= */}
-
-            {!pending && totalRows > 0 && (
-              <div
-                className="
-                  border-t border-slate-200
-                  bg-white px-5 py-4
-                  dark:border-slate-800 dark:bg-slate-900
-                  lg:px-6
-                "
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  {/* INFO */}
-
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
-                    Menampilkan{" "}
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
-                      {(currentPage - 1) * rowsPerPage + 1}
-                    </span>
-                    {" – "}
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
-                      {Math.min(currentPage * rowsPerPage, totalRows)}
-                    </span>
-                    {" dari "}
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">
-                      {totalRows}
-                    </span>
-                    {" data"}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-4">
-                    {/* ROWS PER PAGE */}
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
-                        Baris per halaman
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
+                      Menampilkan{" "}
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {(currentPage - 1) * rowsPerPage + 1}
                       </span>
-
-                      <select
-                        value={rowsPerPage}
-                        onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                        className="
-                          h-8 rounded-lg
-                          border border-slate-200
-                          bg-white px-2.5
-                          text-sm font-medium text-slate-600
-                          outline-none transition
-                          focus:border-sky-400
-                          focus:ring-2 focus:ring-sky-50
-                          dark:border-slate-700
-                          dark:bg-slate-800
-                          dark:text-slate-300
-                          dark:focus:border-sky-600
-                          dark:focus:ring-sky-950/50
-                        "
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                      </select>
+                      {" – "}
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {Math.min(currentPage * rowsPerPage, totalRows)}
+                      </span>
+                      {" dari "}
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {totalRows}
+                      </span>
+                      {" data"}
                     </div>
 
-                    {/* PAGINATION */}
+                    <div className="flex flex-wrap items-center gap-4">
+                      {/* ROWS PER PAGE */}
 
-                    <div className="flex items-center gap-1">
-                      {/* PREVIOUS */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          Baris per halaman
+                        </span>
 
-                      <button
-                        type="button"
-                        disabled={currentPage === 1}
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        className="
-                          flex h-8 w-8 items-center
-                          justify-center rounded-lg
-                          border border-slate-200
-                          bg-white text-slate-500
-                          transition
-                          hover:border-sky-200
-                          hover:bg-sky-50
-                          hover:text-sky-600
-                          disabled:cursor-not-allowed
-                          disabled:opacity-40
-                          dark:border-slate-700
-                          dark:bg-slate-800
-                          dark:text-slate-400
-                          dark:hover:border-sky-800
-                          dark:hover:bg-sky-950/50
-                          dark:hover:text-sky-400
-                        "
-                      >
-                        <Icons.ChevronLeft className="h-4 w-4" />
-                      </button>
+                        <select
+                          value={rowsPerPage}
+                          onChange={(e) =>
+                            setRowsPerPage(Number(e.target.value))
+                          }
+                          className="
+                        h-8 rounded-lg
+                        border border-slate-200
+                        bg-white px-2.5
+                        text-sm font-medium text-slate-600
+                        outline-none transition
+                        focus:border-sky-400
+                        focus:ring-2 focus:ring-sky-50
+                        dark:border-slate-700
+                        dark:bg-slate-800
+                        dark:text-slate-300
+                        dark:focus:border-sky-600
+                        dark:focus:ring-sky-950/50
+                      "
+                        >
+                          <option value={5}>5</option>
+                          <option value={10}>10</option>
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                      </div>
 
-                      {/* NUMBERS */}
+                      {/* PAGINATION */}
 
-                      {pageNumbers.map((page, index) =>
-                        page === "..." ? (
-                          <span
-                            key={`dots-${index}`}
-                            className="
-                              flex h-8 w-7
-                              items-center justify-center
-                              text-sm text-slate-400
-                              dark:text-slate-500
-                            "
-                          >
-                            ...
-                          </span>
-                        ) : (
-                          <button
-                            key={page}
-                            type="button"
-                            onClick={() => setCurrentPage(page)}
-                            className={`
-                              flex h-8 min-w-8
-                              items-center justify-center
-                              rounded-lg px-2
-                              text-sm font-medium transition
+                      <div className="flex items-center gap-1">
+                        {/* PREVIOUS */}
 
-                              ${
-                                currentPage === page
-                                  ? "bg-sky-500 text-white shadow-sm shadow-sky-200 dark:bg-sky-600 dark:shadow-sky-950"
-                                  : "border border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/50 dark:hover:text-sky-400"
-                              }
-                            `}
-                          >
-                            {page}
-                          </button>
-                        ),
-                      )}
+                        <button
+                          type="button"
+                          disabled={currentPage === 1}
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(prev - 1, 1))
+                          }
+                          className="
+                        flex h-8 w-8 items-center
+                        justify-center rounded-lg
+                        border border-slate-200
+                        bg-white text-slate-500
+                        transition
+                        hover:border-sky-200
+                        hover:bg-sky-50
+                        hover:text-sky-600
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                        dark:border-slate-700
+                        dark:bg-slate-800
+                        dark:text-slate-400
+                        dark:hover:border-sky-800
+                        dark:hover:bg-sky-950/50
+                        dark:hover:text-sky-400
+                      "
+                        >
+                          <Icons.ChevronLeft className="h-4 w-4" />
+                        </button>
 
-                      {/* NEXT */}
+                        {/* NUMBERS */}
 
-                      <button
-                        type="button"
-                        disabled={currentPage === totalPages}
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
-                          )
-                        }
-                        className="
-                          flex h-8 w-8 items-center
-                          justify-center rounded-lg
-                          border border-slate-200
-                          bg-white text-slate-500
-                          transition
-                          hover:border-sky-200
-                          hover:bg-sky-50
-                          hover:text-sky-600
-                          disabled:cursor-not-allowed
-                          disabled:opacity-40
-                          dark:border-slate-700
-                          dark:bg-slate-800
-                          dark:text-slate-400
-                          dark:hover:border-sky-800
-                          dark:hover:bg-sky-950/50
-                          dark:hover:text-sky-400
-                        "
-                      >
-                        <Icons.ChevronRightSmall className="h-4 w-4" />
-                      </button>
+                        {pageNumbers.map((page, index) =>
+                          page === "..." ? (
+                            <span
+                              key={`dots-${index}`}
+                              className="
+                            flex h-8 w-7
+                            items-center justify-center
+                            text-sm text-slate-400
+                            dark:text-slate-500
+                          "
+                            >
+                              ...
+                            </span>
+                          ) : (
+                            <button
+                              key={page}
+                              type="button"
+                              onClick={() => setCurrentPage(page)}
+                              className={`
+                            flex h-8 min-w-8
+                            items-center justify-center
+                            rounded-lg px-2
+                            text-sm font-medium transition
+
+                            ${
+                              currentPage === page
+                                ? "bg-sky-500 text-white shadow-sm shadow-sky-200 dark:bg-sky-600 dark:shadow-sky-950"
+                                : "border border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/50 dark:hover:text-sky-400"
+                            }
+                          `}
+                            >
+                              {page}
+                            </button>
+                          ),
+                        )}
+
+                        {/* NEXT */}
+
+                        <button
+                          type="button"
+                          disabled={currentPage === totalPages}
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(prev + 1, totalPages),
+                            )
+                          }
+                          className="
+                        flex h-8 w-8 items-center
+                        justify-center rounded-lg
+                        border border-slate-200
+                        bg-white text-slate-500
+                        transition
+                        hover:border-sky-200
+                        hover:bg-sky-50
+                        hover:text-sky-600
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                        dark:border-slate-700
+                        dark:bg-slate-800
+                        dark:text-slate-400
+                        dark:hover:border-sky-800
+                        dark:hover:bg-sky-950/50
+                        dark:hover:text-sky-400
+                      "
+                        >
+                          <Icons.ChevronRightSmall className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Main>

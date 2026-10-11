@@ -567,6 +567,7 @@ function Home() {
         setMapel(response?.data?.data?.length ?? 0);
       }
     } catch (error) {
+      console.log(error.response);
       console.error("Gagal mengambil data mapel:", error);
       setMapel(0);
     } finally {

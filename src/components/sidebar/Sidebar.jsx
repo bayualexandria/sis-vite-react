@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { Link, useLocation } from "react-router-dom";
 
 import logo from "../../assets/images/logo-pendidikan.png";
 
 import PopUpLogout from "../popup/PopUpLogout";
+import api from "../../utils/repositories"; // Pastikan path import api sudah sesuai
 
 /* ============================================================
    ICONS
@@ -40,7 +41,7 @@ const icons = {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.125-.937 3.375 3.375 0 0 0-3.375-3.375c-.348 0-.686.053-1.006.15M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.003A9.358 9.358 0 0 1 8.25 21c-2.17 0-4.168-.74-5.75-1.983m12.5-12.5a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 3.375a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0ZM4.5 8.25a2.625 2.625 0 1 0 5.25 0 2.625 2.625 0 0 0-5.25 0Z"
+        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.125-.937 3.375 3.375 0 0 0-3.375-3.375c-.348 0-.686.053-1.006.15M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v-.003A9.358 9.358 0 0 1 8.25 21c-2.17 0-4.168-.74-5.75-1.983m12.5-12.5a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 3.375a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0ZM4.5 8.25a2.625 2.625 0 1 0 5.25 0 2.625 2.625 0 0 0-5.25 0Z"
       />
     </svg>
   ),
@@ -57,7 +58,7 @@ const icons = {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.125-.937 3.375 3.375 0 0 0-3.375-3.375c-.348 0-.686.053-1.006.15M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.003A9.358 9.358 0 0 1 8.25 21c-2.17 0-4.168-.74-5.75-1.983m12.5-12.5a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 3.375a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1-5.25 0ZM4.5 8.25a2.625 2.625 0 1 0 5.25 0 2.625 2.625 0 0 0 5.25 0Z"
+        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.125-.937 3.375 3.375 0 0 0-3.375-3.375c-.348 0-.686.053-1.006.15M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v-.003A9.358 9.358 0 0 1 8.25 21c-2.17 0-4.168-.74-5.75-1.983m12.5-12.5a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 3.375a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0ZM4.5 8.25a2.625 2.625 0 1 0 5.25 0 2.625 2.625 0 0 0-5.25 0Z"
       />
     </svg>
   ),
@@ -280,13 +281,42 @@ function Sidebar() {
   const [showMasterData, setShowMasterData] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  /* ============================================================
-     AMBIL USERNAME
-  ============================================================ */
+  // State untuk menyimpan data guru mapel guna pengecekan NIP
+  const [hasMatchingNip, setHasMatchingNip] = useState(false);
 
   /* ============================================================
-     AMBIL DATA USER
+     CEK NIP GURU MAPEL DENGAN USERNAME
   ============================================================ */
+
+  const checkGuruMapelNip = useCallback(async () => {
+    try {
+      const response = await api.get("guru-mapel/");
+      const data = response?.data?.data ?? [];
+
+      const username = String(localStorage.getItem("username") ?? "")
+        .replace(/["']/g, "")
+        .trim()
+        .toLowerCase();
+
+      if (Array.isArray(data) && username) {
+        const isMatch = data.some((item) => {
+          const itemNip = String(item?.nip ?? "")
+            .replace(/["']/g, "")
+            .trim()
+            .toLowerCase();
+          return itemNip === username;
+        });
+        setHasMatchingNip(isMatch);
+      }
+    } catch (error) {
+      console.error("Gagal memeriksa NIP guru mapel:", error);
+      setHasMatchingNip(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkGuruMapelNip();
+  }, [checkGuruMapelNip]);
 
   /* ============================================================
      MOBILE SIDEBAR EVENT
@@ -355,14 +385,6 @@ function Sidebar() {
     return (
       location.pathname === path || location.pathname.startsWith(`${path}/`)
     );
-  };
-
-  /* ============================================================
-     CLOSE MOBILE SIDEBAR
-  ============================================================ */
-
-  const closeMobileSidebar = () => {
-    setMobileOpen(false);
   };
 
   return (
@@ -600,7 +622,7 @@ function Sidebar() {
               label="Home"
               icon={icons.home}
               active={isActive("/home")}
-              onClick={closeMobileSidebar}
+              onClick={() => setMobileOpen(false)}
             />
 
             {/* ==================================================
@@ -663,6 +685,7 @@ function Sidebar() {
                               dark:bg-slate-800
                               dark:text-slate-400
                               dark:group-hover:bg-slate-700
+                              dark:group-hover:text-primary
                             `
                         }
                       `}
@@ -724,7 +747,7 @@ function Sidebar() {
                         label="Guru"
                         icon={icons.guru}
                         active={isActive("/guru")}
-                        onClick={closeMobileSidebar}
+                        onClick={() => setMobileOpen(false)}
                       />
 
                       <MenuItem
@@ -732,7 +755,7 @@ function Sidebar() {
                         label="Siswa"
                         icon={icons.siswa}
                         active={isActive("/siswa")}
-                        onClick={closeMobileSidebar}
+                        onClick={() => setMobileOpen(false)}
                       />
 
                       <MenuItem
@@ -740,7 +763,7 @@ function Sidebar() {
                         label="Mata Pelajaran"
                         icon={icons.mapel}
                         active={isActive("/mapel")}
-                        onClick={closeMobileSidebar}
+                        onClick={() => setMobileOpen(false)}
                       />
                     </div>
                   </div>
@@ -755,7 +778,7 @@ function Sidebar() {
                 label="Ruang Kelas"
                 icon={icons.kelas}
                 active={isActive("/kelas")}
-                onClick={closeMobileSidebar}
+                onClick={() => setMobileOpen(false)}
               />
             )}
 
@@ -765,24 +788,26 @@ function Sidebar() {
               label="Absensi"
               icon={icons.absensi}
               active={isActive("/absensi")}
-              onClick={closeMobileSidebar}
+              onClick={() => setMobileOpen(false)}
             />
 
-            {/* PROFILE SEKOLAH */}
-            <MenuItem
-              to="/guru-mapel"
-              label="Guru Mata Pelajaran"
-              icon={icons.guruMapel}
-              active={isActive("/guru-mapel")}
-              onClick={closeMobileSidebar}
-            />
+            {/* Guru Mata Pelajaran (Ditampilkan jika statusId 1, 3, atau jika NIP di data mapel sama dengan username) */}
+            {(statusId === 1 || statusId === 3 || hasMatchingNip) && (
+              <MenuItem
+                to="/guru-mapel"
+                label="Guru Mata Pelajaran"
+                icon={icons.guruMapel}
+                active={isActive("/guru-mapel")}
+                onClick={() => setMobileOpen(false)}
+              />
+            )}
 
             <MenuItem
               to="/profile-sekolah"
               label="Profile Sekolah"
               icon={icons.sekolah}
               active={isActive("/profile-sekolah")}
-              onClick={closeMobileSidebar}
+              onClick={() => setMobileOpen(false)}
             />
 
             {/* INFORMASI */}
@@ -866,7 +891,7 @@ function Sidebar() {
               label="Profile"
               icon={icons.profile}
               active={isActive("/profile")}
-              onClick={closeMobileSidebar}
+              onClick={() => setMobileOpen(false)}
             />
           </nav>
         </div>

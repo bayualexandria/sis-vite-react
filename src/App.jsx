@@ -187,7 +187,9 @@ function App() {
         path="/guru-mapel"
         element={
           <PrivateRoute>
-            <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.GURU]}>
+            <RoleRoute
+              allowedRoles={[ROLES.ADMIN, ROLES.GURU, ROLES.WALIKELAS]}
+            >
               <GuruMapel />
             </RoleRoute>
           </PrivateRoute>
@@ -197,7 +199,9 @@ function App() {
         path="/guru-mapel/:id"
         element={
           <PrivateRoute>
-            <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.GURU]}>
+            <RoleRoute
+              allowedRoles={[ROLES.ADMIN, ROLES.GURU, ROLES.WALIKELAS]}
+            >
               <GuruMapelById />
             </RoleRoute>
           </PrivateRoute>

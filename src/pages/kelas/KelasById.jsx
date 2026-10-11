@@ -9,6 +9,7 @@ import RefreshDataSiswaByKelas from "./components/RefreshDataSiswaByKelas";
 import DeleteDataSiswaHistory from "./components/DeleteDataSiswaHistory";
 import api from "../../utils/repositories";
 import KartuTandaSiswa from "./KartuTandaSiswa";
+import JadwalMapelByKelas from "./modal/JadwalMapelByKelas";
 
 function KelasById() {
   const { nip, id, kelasid } = useParams();
@@ -438,6 +439,9 @@ function KelasById() {
                       {kelas?.nama_kelas ?? "-"}
                       {kelas?.jurusan ? ` | ${kelas.jurusan}` : ""}
                     </p>
+                  </div>
+                  <div className="py-3">
+                    <JadwalMapelByKelas kelas={kelas} />
                   </div>
                 </div>
               </div>
