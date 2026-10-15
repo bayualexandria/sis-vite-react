@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -109,7 +109,7 @@ function GetDataJadwalMapelByKelas({ row }) {
   const [selectedHari, setSelectedHari] = useState("");
 
   /* =====================================================
-     GET DATA JADWAL KELAS
+     GET DATA JADWAL KELAS & SORTING HARI & JAM
   ===================================================== */
 
   const getDataKelas = async () => {
@@ -119,7 +119,35 @@ function GetDataJadwalMapelByKelas({ row }) {
         .get(`jadwal-mapel/kelas/${row.kelas_id}`)
         .then((res) => res.data);
 
-      setJadwalList(response?.data || []);
+      const rawData = response?.data || [];
+
+      // Pemetaan urutan hari
+      const urutanHari = {
+        Senin: 1,
+        Selasa: 2,
+        Rabu: 3,
+        Kamis: 4,
+        Jumat: 5,
+        Sabtu: 6,
+        Minggu: 7,
+      };
+
+      // Urutkan berdasarkan hari terlebih dahulu, lalu berdasarkan jam_mulai
+      const sortedData = rawData.sort((a, b) => {
+        const dayA = urutanHari[a.hari] || 99;
+        const dayB = urutanHari[b.hari] || 99;
+
+        if (dayA !== dayB) {
+          return dayA - dayB;
+        }
+
+        // Jika hari sama, urutkan berdasarkan jam mulai (misal format "07:00")
+        const jamA = a.jam_mulai || "";
+        const jamB = b.jam_mulai || "";
+        return jamA.localeCompare(jamB);
+      });
+
+      setJadwalList(sortedData);
     } catch (e) {
       console.error("Error get jadwal kelas:", e);
 

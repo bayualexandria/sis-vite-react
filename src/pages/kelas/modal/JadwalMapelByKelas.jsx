@@ -109,7 +109,7 @@ function JadwalMapelByKelas({ kelas }) {
   const [selectedHari, setSelectedHari] = useState("");
 
   /* =====================================================
-     GET DATA JADWAL KELAS
+     GET DATA JADWAL KELAS & SORTING
   ===================================================== */
 
   const getDataKelas = async () => {
@@ -119,7 +119,35 @@ function JadwalMapelByKelas({ kelas }) {
         .get(`jadwal-mapel/kelas/${kelas.kelas_id}`)
         .then((res) => res.data);
 
-      setJadwalList(response?.data || []);
+      const rawData = response?.data || [];
+
+      // Pemetaan urutan hari agar berurutan secara kronologis
+      const urutanHari = {
+        Senin: 1,
+        Selasa: 2,
+        Rabu: 3,
+        Kamis: 4,
+        Jumat: 5,
+        Sabtu: 6,
+        Minggu: 7,
+      };
+
+      // Urutkan data berdasarkan hari, lalu jam mulai
+      const sortedData = rawData.sort((a, b) => {
+        const dayA = urutanHari[a.hari] || 99;
+        const dayB = urutanHari[b.hari] || 99;
+
+        if (dayA !== dayB) {
+          return dayA - dayB;
+        }
+
+        // Jika hari sama, urutkan berdasarkan jam mulai
+        const jamA = a.jam_mulai || "";
+        const jamB = b.jam_mulai || "";
+        return jamA.localeCompare(jamB);
+      });
+
+      setJadwalList(sortedData);
     } catch (e) {
       console.error("Error get jadwal kelas:", e);
 
@@ -281,7 +309,7 @@ function JadwalMapelByKelas({ kelas }) {
                       dark:text-white
                     "
                   >
-                    Jadwal Kelas {kelas.nama_kelas} - {kelas.jurusan}
+                    Jadwal Kelas {kelas.nama_kelas} {kelas.jurusan}
                   </h2>
                   <p className="mt-0.5 text-xs text-slate-400">
                     Daftar mata pelajaran berdasarkan jadwal kelas
@@ -356,7 +384,6 @@ function JadwalMapelByKelas({ kelas }) {
                   <table className="w-full text-left border-collapse text-sm">
                     <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                       <tr>
-                        {/* Kolom Hari diperlebar menggunakan w-36 */}
                         <th className="w-24 px-4 py-3">Hari</th>
                         <th className="px-4 py-3">Jam</th>
                         <th className="px-4 py-3">Mata Pelajaran</th>
