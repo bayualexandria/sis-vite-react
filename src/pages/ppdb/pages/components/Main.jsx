@@ -6,6 +6,7 @@ import {
   LogOut,
   HelpCircle,
   X,
+  Menu, // Ditambahkan untuk ikon tombol hamburger mobile
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -76,6 +77,11 @@ export default function Main({ children }) {
     getUserData();
   }, [getUserData]);
 
+  // Tutup sidebar otomatis setiap kali pindah halaman di mode mobile
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
   const popUpLogoutButtonPPDB = async () => {
     const result = await templateModal.fire({
       title: "Keluar dari sistem?",
@@ -112,10 +118,29 @@ export default function Main({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex text-slate-800">
-      {/* ================= 1. SIDEBAR NAVIGATION ================= */}
+    <div className="min-h-screen bg-slate-50 font-sans flex flex-col lg:flex-row text-slate-800">
+      {/* ================= 1. MOBILE NAVBAR (Header Atas Khusus Mobile) ================= */}
+      <div className="lg:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 sticky top-0 z-30 shadow-md">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-blue-600 rounded-lg text-white">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <span className="font-bold text-sm tracking-wide">PPDB Online</span>
+        </div>
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition"
+          aria-label="Buka Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* ================= 2. SIDEBAR NAVIGATION ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 `}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="h-full flex flex-col justify-between p-6">
           <div className="space-y-8">
@@ -136,7 +161,8 @@ export default function Main({ children }) {
               </div>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="lg:hidden text-slate-400 hover:text-white"
+                className="lg:hidden text-slate-400 hover:text-white p-1"
+                aria-label="Tutup Menu"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -166,7 +192,6 @@ export default function Main({ children }) {
                   to: "/ppdb/bantuan",
                 },
               ].map((item, idx) => {
-                // Mengecek apakah URL saat ini cocok dengan path menu
                 const isActive = location.pathname === item.to;
 
                 return (
@@ -190,7 +215,7 @@ export default function Main({ children }) {
           {/* User Profile Footer */}
           <div className="pt-6 border-t border-slate-800 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-md shrink-0">
                 {user.nama_lengkap
                   ? user.nama_lengkap.charAt(0).toUpperCase()
                   : "U"}
@@ -224,7 +249,8 @@ export default function Main({ children }) {
         />
       )}
 
-      {children}
+      {/* ================= 3. MAIN CONTENT AREA ================= */}
+      <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
     </div>
   );
 }

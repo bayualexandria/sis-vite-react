@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -18,18 +17,6 @@ export default function FooterSection() {
     };
     fetchProfile();
   }, []);
-=======
-import { Link } from "react-router-dom";
-
-export default function FooterSection({ sekolah, isDetailPage = false }) {
-  const namaSekolah = sekolah?.nama_sekolah || "SMK Nama Sekolah";
-  const alamatSekolah = sekolah?.alamat || "Alamat sekolah belum tersedia";
-  const teleponSekolah = sekolah?.telepon || "Nomor telepon belum tersedia";
-  const emailSekolah = sekolah?.email || "Email sekolah belum tersedia";
-  const websiteSekolah = sekolah?.website || "Website belum tersedia";
-
-  const getNavHref = (target) => (isDetailPage ? `/${target}` : target);
->>>>>>> 288fe97 (Updated)
 
   return (
     <footer className="bg-slate-950 text-slate-300">
@@ -41,13 +28,14 @@ export default function FooterSection({ sekolah, isDetailPage = false }) {
               S
             </div>
             <div className="min-w-0">
-<<<<<<< HEAD
               <h3 className="truncate font-bold text-white">
                 {sekolah.nama_sekolah}
               </h3>
-=======
-              <h3 className="truncate font-bold text-white">{namaSekolah}</h3>
->>>>>>> 288fe97 (Updated)
+
+              <h3 className="truncate font-bold text-white">
+                {sekolah.nama_sekolah}
+              </h3>
+
               <p className="text-xs text-slate-500">
                 Sekolah Menengah Kejuruan
               </p>
@@ -64,7 +52,6 @@ export default function FooterSection({ sekolah, isDetailPage = false }) {
         <div>
           <h3 className="mb-5 font-bold text-white">Menu Navigasi</h3>
           <div className="grid gap-3">
-<<<<<<< HEAD
             <Link
               to="/"
               className="text-sm text-slate-400 transition hover:text-white"
@@ -89,21 +76,14 @@ export default function FooterSection({ sekolah, isDetailPage = false }) {
             >
               Fasilitas
             </Link>
-            <Link
-              to="/tenaga-pengajar"
-=======
-            <FooterLink href={getNavHref("#home")} text="Beranda" />
-            <FooterLink href={getNavHref("#about")} text="Profil" />
-            <FooterLink href={getNavHref("#jurusan")} text="Jurusan" />
-            <FooterLink href={getNavHref("#fasilitas")} text="Fasilitas" />
+            <Link to="/tenaga-pengajar"></Link>
             <Link
               to="/guru"
->>>>>>> 288fe97 (Updated)
               className="text-sm text-slate-400 transition hover:text-white"
             >
               Guru & Staff
             </Link>
-<<<<<<< HEAD
+
             <Link
               to="/prestasi"
               className="text-sm text-slate-400 transition hover:text-white"
@@ -122,11 +102,6 @@ export default function FooterSection({ sekolah, isDetailPage = false }) {
             >
               Kontak
             </Link>
-=======
-            <FooterLink href={getNavHref("#prestasi")} text="Prestasi" />
-            <FooterLink href={getNavHref("#berita")} text="Berita" />
-            <FooterLink href={getNavHref("#kontak")} text="Kontak" />
->>>>>>> 288fe97 (Updated)
           </div>
         </div>
 
@@ -134,43 +109,23 @@ export default function FooterSection({ sekolah, isDetailPage = false }) {
         <div>
           <h3 className="mb-5 font-bold text-white">Kontak</h3>
           <div className="space-y-4 text-sm leading-6 text-slate-400">
-<<<<<<< HEAD
             <p>{sekolah.nama_sekolah}</p>
             <p>{sekolah.no_telp}</p>
             <p className="break-all">{sekolah.email}</p>
-=======
-            <p>{alamatSekolah}</p>
-            <p>{teleponSekolah}</p>
-            <p className="break-all">{emailSekolah}</p>
-            <p className="break-all">{websiteSekolah}</p>
->>>>>>> 288fe97 (Updated)
+
+            <p>{sekolah.alamat}</p>
+            <p>{sekolah.no_telp}</p>
+            <p className="break-all">{sekolah.email}</p>
           </div>
         </div>
       </div>
 
       {/* Copyright */}
       <div className="border-t border-slate-800 px-4 py-6 text-center text-sm text-slate-500 sm:px-6">
-<<<<<<< HEAD
         © {new Date().getFullYear()} {sekolah.nama_sekolah}. All Rights
-        Reserved.
-=======
-        © {new Date().getFullYear()} {namaSekolah}. All Rights Reserved.
->>>>>>> 288fe97 (Updated)
+        Reserved. © {new Date().getFullYear()} {sekolah.nama_sekolah}. All
+        Rights Reserved.
       </div>
     </footer>
   );
 }
-<<<<<<< HEAD
-=======
-
-function FooterLink({ href, text }) {
-  return (
-    <a
-      href={href}
-      className="text-sm text-slate-400 transition hover:text-white"
-    >
-      {text}
-    </a>
-  );
-}
->>>>>>> 288fe97 (Updated)

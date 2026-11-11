@@ -20,13 +20,14 @@ import {
   KelasById,
   PageNotFound,
 } from "./pages/Index";
-import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
-import { LoginPPDB } from "./pages/ppdb/auth/LoginPPDB";
-import { RegisterPPDB } from "./pages/ppdb/auth/RegisterPPDB";
-import { DashboardPPDB } from "./pages/ppdb/pages/Home";
-import { FormulirPPDB } from "./pages/ppdb/pages/Formulir";
-import { CalonSiswa } from "./pages/calonsiswa/CalonSiswa";
+import LoginPPDB from "./pages/ppdb/auth/LoginPPDB";
+import RegisterPPDB from "./pages/ppdb/auth/RegisterPPDB";
+import FormulirPPDB from "./pages/ppdb/pages/Formulir";
 import GuruMapelById from "./pages/gurumapel/GuruMapelById";
+import CalonSiswa from "./pages/calonsiswa/CalonSiswa";
+import DashboardPPDB from "./pages/ppdb/pages/DashboardPPDB";
+import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
+import GetCalonSiswaByUsername from "./pages/calonsiswa/GetCalonSiswaByUsername";
 
 // Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
 const ROLES = {
@@ -128,6 +129,19 @@ function App() {
               allowedRoles={[ROLES.ADMIN, ROLES.GURU, ROLES.WALIKELAS]}
             >
               <CalonSiswa />
+            </RoleRoute>
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/siswa-ppdb/:username"
+        element={
+          <PrivateRoute>
+            <RoleRoute
+              allowedRoles={[ROLES.ADMIN, ROLES.GURU, ROLES.WALIKELAS]}
+            >
+              <GetCalonSiswaByUsername />
             </RoleRoute>
           </PrivateRoute>
         }
