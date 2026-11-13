@@ -86,7 +86,6 @@ function UpdateDataSiswa() {
 
       const response = await api.get(`siswa/user/${nis}`);
       const data = response?.data?.data;
-      console.log(response);
 
       if (!data) {
         throw new Error("Data siswa tidak ditemukan.");
@@ -250,8 +249,6 @@ function UpdateDataSiswa() {
       formData.append("image_profile", image);
     }
 
-    console.log(formData);
-
     try {
       const response = await api.patch(`siswa/${nis}`, formData);
 
@@ -271,7 +268,6 @@ function UpdateDataSiswa() {
         navigate("/siswa");
       }
     } catch (err) {
-      console.log("update siswa", err.response);
       console.error("Gagal memperbarui data siswa:", err);
 
       const message = err?.response?.data?.data;

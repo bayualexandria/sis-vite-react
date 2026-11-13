@@ -239,7 +239,6 @@ function AddDataGuruMapel({ dataGuruMapel }) {
   const getDataGuru = async () => {
     try {
       const response = await api.get("guru/").then((res) => res.data);
-      console.log(response);
 
       setGuru(response?.data || []);
     } catch (e) {
@@ -260,7 +259,6 @@ function AddDataGuruMapel({ dataGuruMapel }) {
   formData.append("mata_pelajaran_id", mapelID);
 
   const saveGuruMapel = async (e) => {
-    console.log("formData", guruID, mapelID);
     e.preventDefault();
 
     if (loading) return;

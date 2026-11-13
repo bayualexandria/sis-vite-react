@@ -9,13 +9,13 @@ function DeleteDataSiswaHistory({ id, nis, getDataSiswaByKelas }) {
     setBtnDelete(!btnDelete);
 
     try {
-      let response = await api.delete(`siswa-kelas/${id}/${nis}`);
-      console.log("delete siswa history", response);
+      await api.delete(`siswa-kelas/${id}/${nis}`);
+
       setTimeout(() => {
         getDataSiswaByKelas();
       }, 0.1);
     } catch (error) {
-      console.log("error", error);
+      console.error("error", error);
     }
   };
 

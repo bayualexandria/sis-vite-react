@@ -11,14 +11,13 @@ function AddDataSiswaHistory({ siswaId, kelasId, waliKelasId, getDataSiswa }) {
   const insertHistorySiswa = async () => {
     setBtnAdd(!btnAdd);
     try {
-      let response = await api.post(`siswa-kelas/`, formData);
-      console.log("data", formData);
-      console.log("siswa hello", response);
+      await api.post(`siswa-kelas/`, formData);
+
       setTimeout(() => {
         getDataSiswa();
       }, 0.1);
     } catch (error) {
-      console.log("error", error.response);
+      console.error("error", error);
     }
   };
   return (

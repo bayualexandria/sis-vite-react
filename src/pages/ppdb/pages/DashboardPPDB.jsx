@@ -18,18 +18,14 @@ export default function DashboardPPDB() {
   const navigate = useNavigate();
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
+  const [calonSiswa, setCalonSiswa] = useState({});
 
   // ============================================================
-  // USERNAME
+  // USERNAME & FETCH DATA
   // ============================================================
-
   const getUsername = () => {
     const storedUsername = localStorage.getItem("username");
-
-    if (!storedUsername) {
-      return null;
-    }
-
+    if (!storedUsername) return null;
     try {
       return JSON.parse(storedUsername);
     } catch {
@@ -39,7 +35,23 @@ export default function DashboardPPDB() {
 
   const getUserData = useCallback(async () => {
     const username = getUsername();
+    if (!username) {
+      setLoading(false);
+      navigate("/ppdb/login", { replace: true });
+      return;
+    }
+    try {
+      let response = await api.get(`ppdb/user/${username}`, {
+        withCredentials: true,
+      });
+      setUser(response.data.data || {});
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [navigate]);
 
+  const getDataCalonSiswa = useCallback(async () => {
+    const username = getUsername();
     if (!username) {
       setLoading(false);
       navigate("/ppdb/login", { replace: true });
@@ -47,64 +59,133 @@ export default function DashboardPPDB() {
     }
     try {
       setLoading(true);
-      let response = await api.get(`ppdb/user/${username}`, {
+      let response = await api.get(`ppdb/data-siswa/${username}`, {
         withCredentials: true,
       });
-      setUser(response.data.data);
-      console.log("User data fetched:", response.data.data);
+      setCalonSiswa(response.data.data || {});
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching calon siswa data:", error);
     } finally {
       setLoading(false);
     }
   }, [navigate]);
 
   useEffect(() => {
+    getDataCalonSiswa();
     getUserData();
-  }, [getUserData]);
-  // Data Simulasi Calon Siswa
-  const studentData = {
-    jalur: "Jalur Prestasi Akademik",
-    status: "Verifikasi Berkas", // 'Diterima', 'Verifikasi Berkas', 'Pending'
-    progres: 65,
+  }, [getUserData, getDataCalonSiswa]);
+
+  // ============================================================
+  // LOGIKA STATUS DINAMIS BERDASARKAN DATA `calonSiswa`
+  // ============================================================
+
+  // Cek apakah data calon siswa sudah ada (objek tidak kosong)
+  const hasDataSiswa = Boolean(
+    calonSiswa &&
+    typeof calonSiswa === "object" &&
+    Object.keys(calonSiswa).length > 0,
+  );
+
+  // Status berkas dari backend (misal: "Verifikasi Berkas", "Diterima", "Pending", dll)
+  const statusBerkasBackend = (
+    calonSiswa.status_berkas ||
+    calonSiswa.status ||
+    ""
+  ).toLowerCase();
+
+  const getStepStatus = (stepName) => {
+    if (stepName === "Pendaftaran Akun") {
+      return "completed";
+    }
+
+    if (stepName === "Pengisian Biodata & Berkas") {
+      // Jika data siswa sudah ada dari API, otomatis completed
+      return hasDataSiswa ? "completed" : "current";
+    }
+
+    if (stepName === "Verifikasi Berkas Panitia") {
+      if (!hasDataSiswa) return "upcoming";
+      // Jika status backend sudah selesai/diterima/verified
+      if (
+        statusBerkasBackend.includes("diterima") ||
+        statusBerkasBackend.includes("selesai") ||
+        statusBerkasBackend.includes("verified") ||
+        calonSiswa.verifikasi_panitia_status === "completed"
+      ) {
+        return "completed";
+      }
+      return "current"; // Masih dalam tahap verifikasi
+    }
+
+    if (stepName === "Tes Seleksi / Wawancara") {
+      if (!hasDataSiswa) return "upcoming";
+      if (
+        statusBerkasBackend.includes("lulus tes") ||
+        statusBerkasBackend.includes("wawancara selesai")
+      ) {
+        return "completed";
+      }
+      return statusBerkasBackend.includes("tes") ? "current" : "upcoming";
+    }
+
+    if (stepName === "Pengumuman Hasil Akhir") {
+      if (
+        statusBerkasBackend.includes("diterima") ||
+        statusBerkasBackend.includes("lulus")
+      ) {
+        return "completed";
+      }
+      return "upcoming";
+    }
+
+    return "upcoming";
   };
 
-  // Tahapan Pendaftaran
+  // Kalkulasi data statistik tampilan
+  const studentData = {
+    jalur: calonSiswa.jalur_pendaftaran || "Jalur Reguler / Prestasi",
+    status: hasDataSiswa
+      ? calonSiswa.status_berkas || "Verifikasi Berkas"
+      : "Belum Mengisi Biodata",
+    progres: hasDataSiswa ? calonSiswa.progres || 65 : 30,
+  };
+
+  // Tahapan Pendaftaran Dinamis
   const timelineSteps = [
-    { title: "Pendaftaran Akun", status: "completed", date: "10 Mei 2026" },
+    {
+      title: "Pendaftaran Akun",
+      status: getStepStatus("Pendaftaran Akun"),
+      date: "10 Mei 2026",
+    },
     {
       title: "Pengisian Biodata & Berkas",
-      status: "completed",
+      status: getStepStatus("Pengisian Biodata & Berkas"),
       date: "12 Mei 2026",
     },
     {
       title: "Verifikasi Berkas Panitia",
-      status: "current",
+      status: getStepStatus("Verifikasi Berkas Panitia"),
       date: "14 - 18 Mei 2026",
     },
     {
       title: "Tes Seleksi / Wawancara",
-      status: "upcoming",
+      status: getStepStatus("Tes Seleksi / Wawancara"),
       date: "22 Mei 2026",
     },
     {
       title: "Pengumuman Hasil Akhir",
-      status: "upcoming",
+      status: getStepStatus("Pengumuman Hasil Akhir"),
       date: "30 Mei 2026",
     },
   ];
 
   return (
     <Main>
-      {/* ================= 2. MAIN CONTENT AREA ================= */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* TOP NAVBAR */}
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => {}}
-              className="lg:hidden p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200"
-            >
+            <button className="lg:hidden p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200">
               <Menu className="w-5 h-5" />
             </button>
             <div>
@@ -115,7 +196,6 @@ export default function DashboardPPDB() {
             </div>
           </div>
 
-          {/* Top Right Notifications */}
           <div className="flex items-center gap-3">
             <button className="relative p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 transition-colors">
               <Bell className="w-5 h-5" />
@@ -141,13 +221,11 @@ export default function DashboardPPDB() {
                 Halo, {loading ? "Loading..." : user.nama_lengkap || "User"}! 👋
               </h3>
               <p className="text-sm text-blue-100/90 leading-relaxed">
-                Berkas pendaftaran Anda saat ini sedang dalam proses pemeriksaan
-                oleh panitia PPDB. Pastikan untuk mengecek pengumuman secara
-                berkala.
+                {hasDataSiswa
+                  ? "Berkas pendaftaran Anda saat ini sedang dalam proses pemeriksaan oleh panitia PPDB. Pastikan untuk mengecek pengumuman secara berkala."
+                  : "Silakan lengkapi biodata dan unggah berkas pendaftaran Anda untuk melanjutkan proses seleksi."}
               </p>
             </div>
-
-            {/* Decorative Background Circles */}
             <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
           </motion.div>
 
@@ -173,7 +251,9 @@ export default function DashboardPPDB() {
                   {studentData.status}
                 </span>
                 <p className="text-xs text-slate-500 mt-2">
-                  Sedang ditinjau oleh panitia seleksi daerah.
+                  {hasDataSiswa
+                    ? "Sedang ditinjau oleh panitia seleksi daerah."
+                    : "Menunggu pengisian data mandiri."}
                 </p>
               </div>
             </motion.div>
@@ -227,14 +307,16 @@ export default function DashboardPPDB() {
                 />
               </div>
               <p className="text-xs text-slate-500">
-                Langkah berikutnya: Tes Seleksi Online
+                {hasDataSiswa
+                  ? "Langkah berikutnya: Verifikasi / Tes Seleksi"
+                  : "Langkah berikutnya: Isi Biodata & Berkas"}
               </p>
             </motion.div>
           </div>
 
           {/* MAIN SECTION: TIMELINE & QUICK ACTIONS */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* TIMELINE ALUR PENDAFTARAN (2 Kolom) */}
+            {/* TIMELINE ALUR PENDAFTARAN */}
             <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
@@ -295,8 +377,9 @@ export default function DashboardPPDB() {
                         </div>
                         {isCurrent && (
                           <p className="text-xs text-slate-500 mt-1 bg-blue-50/60 p-2.5 rounded-xl border border-blue-100">
-                            Berkas Anda sedang dalam proses verifikasi tim
-                            administratif.
+                            {step.title === "Pengisian Biodata & Berkas"
+                              ? "Silakan lengkapi formulir biodata dan berkas pendaftaran Anda."
+                              : "Berkas Anda sedang dalam proses verifikasi tim administratif."}
                           </p>
                         )}
                       </div>
@@ -306,9 +389,8 @@ export default function DashboardPPDB() {
               </div>
             </div>
 
-            {/* QUICK ACTIONS & PENGUMUMAN (1 Kolom) */}
+            {/* QUICK ACTIONS & PENGUMUMAN */}
             <div className="space-y-6">
-              {/* Kartu Cetak Kartu Ujian */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
                 <h4 className="text-sm font-bold text-slate-900">
                   Kartu Peserta
@@ -323,7 +405,6 @@ export default function DashboardPPDB() {
                 </button>
               </div>
 
-              {/* Pengumuman Penting */}
               <div className="bg-amber-50/60 border border-amber-200/80 p-6 rounded-3xl space-y-3">
                 <div className="flex items-center gap-2 text-amber-800">
                   <AlertCircle className="w-5 h-5 shrink-0" />

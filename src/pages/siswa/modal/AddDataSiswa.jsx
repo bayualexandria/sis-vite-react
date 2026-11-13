@@ -228,7 +228,6 @@ function AddDataSiswa(props) {
       }
     } catch (err) {
       console.error("Gagal menyimpan data siswa:", err);
-      console.log(err.response);
 
       setError({
         general: err.response.data.message,

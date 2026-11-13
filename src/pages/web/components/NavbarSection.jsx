@@ -9,7 +9,7 @@ export default function NavbarSection({ isDetailPage = false }) {
   const [sekolah, setSekolah] = useState(null);
 
   const namaSekolah = sekolah?.nama_sekolah || "SMK Nama Sekolah";
-  const getNavHref = (target) => (isDetailPage ? `/${target}` : target);
+  (target) => (isDetailPage ? `/${target}` : target);
 
   const closeMobileMenu = () => setMobileMenu(false);
 
@@ -61,19 +61,49 @@ export default function NavbarSection({ isDetailPage = false }) {
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center gap-7 lg:flex">
-          <NavLink href={getNavHref("#home")} text="Beranda" />
-          <NavLink href={getNavHref("#about")} text="Profil" />
-          <NavLink href={getNavHref("#jurusan")} text="Jurusan" />
-          <NavLink href={getNavHref("#fasilitas")} text="Fasilitas" />
+          <Link to="/">Home</Link>
+          <Link
+            to="/profil"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Profil
+          </Link>
+          <Link
+            to="/jurusan"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Jurusan
+          </Link>
+          <Link
+            to="/fasilitas"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Fasilitas
+          </Link>
           <Link
             to="/tenaga-pengajar"
             className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
           >
             Guru & Staf
           </Link>
-          <NavLink href={getNavHref("#prestasi")} text="Prestasi" />
-          <NavLink href={getNavHref("#berita")} text="Berita" />
-          <NavLink href={getNavHref("#kontak")} text="Kontak" />
+          <Link
+            to="/prestasi"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Prestasi
+          </Link>
+          <Link
+            to="/berita"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Berita
+          </Link>
+          <Link
+            to="/kontak"
+            className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+          >
+            Kontak
+          </Link>
         </nav>
 
         {/* Action Button */}
@@ -133,23 +163,19 @@ export default function NavbarSection({ isDetailPage = false }) {
       >
         <nav className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid gap-1.5">
+            <MobileNavLink href="/" text="Beranda" onClick={closeMobileMenu} />
             <MobileNavLink
-              href={getNavHref("#home")}
-              text="Beranda"
-              onClick={closeMobileMenu}
-            />
-            <MobileNavLink
-              href={getNavHref("#about")}
+              href="/profil"
               text="Profil"
               onClick={closeMobileMenu}
             />
             <MobileNavLink
-              href={getNavHref("#jurusan")}
+              href="/jurusan"
               text="Jurusan"
               onClick={closeMobileMenu}
             />
             <MobileNavLink
-              href={getNavHref("#fasilitas")}
+              href="/fasilitas"
               text="Fasilitas"
               onClick={closeMobileMenu}
             />
@@ -161,17 +187,17 @@ export default function NavbarSection({ isDetailPage = false }) {
               Guru & Staf
             </Link>
             <MobileNavLink
-              href={getNavHref("#prestasi")}
+              href="/prestasi"
               text="Prestasi"
               onClick={closeMobileMenu}
             />
             <MobileNavLink
-              href={getNavHref("#berita")}
+              href="/berita"
               text="Berita"
               onClick={closeMobileMenu}
             />
             <MobileNavLink
-              href={getNavHref("#kontak")}
+              href="/kontak"
               text="Kontak"
               onClick={closeMobileMenu}
             />
@@ -190,25 +216,14 @@ export default function NavbarSection({ isDetailPage = false }) {
   );
 }
 
-function NavLink({ href, text }) {
-  return (
-    <a
-      href={href}
-      className="text-sm font-semibold text-slate-600 transition hover:text-blue-600"
-    >
-      {text}
-    </a>
-  );
-}
-
 function MobileNavLink({ href, text, onClick }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       onClick={onClick}
       className="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50 hover:text-blue-600"
     >
       {text}
-    </a>
+    </Link>
   );
 }

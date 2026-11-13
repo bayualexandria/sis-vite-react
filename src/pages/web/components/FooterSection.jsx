@@ -9,7 +9,6 @@ export default function FooterSection() {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(`${repo}api/profile-sekolah`);
-        console.log(response.data);
         setSekolah(response.data?.data || null);
       } catch (error) {
         console.error("Gagal mengambil data profil:", error);

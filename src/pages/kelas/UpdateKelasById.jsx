@@ -175,7 +175,6 @@ function UpdateKelasById({ id, getKelasHistory }) {
     const formData = new FormData();
     formData.append("kelas_id", kelasID);
     formData.append("guru_wali_id", waliKelas);
-    console.log(waliKelas + kelasID);
 
     try {
       const response = await api
@@ -213,7 +212,6 @@ function UpdateKelasById({ id, getKelasHistory }) {
       );
       setLoading(false);
     } catch (error) {
-      console.log(error.response);
       console.error("Gagal memperbarui data kelas:", error);
       setLoading(false);
 

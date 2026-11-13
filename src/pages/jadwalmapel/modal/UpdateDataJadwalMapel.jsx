@@ -243,9 +243,6 @@ const SelectField = ({
 ========================================================= */
 
 function UpdateDataJadwalMapel({ id, row }) {
-  console.log("Upadate Data");
-  console.log(row);
-
   const [kelas, setKelas] = useState([]);
 
   const [open, setOpen] = useState(false);
@@ -287,16 +284,6 @@ function UpdateDataJadwalMapel({ id, row }) {
   /* =====================================================
      RESET FORM TO INITIAL ROW VALUES
   ===================================================== */
-
-  const resetForm = () => {
-    if (row) {
-      setKelasID(row.kelas_id || row.kelas?.id || "");
-      setHari(row.hari || "");
-      setJamMulai(row.jam_mulai || row.jam_awal || "");
-      setJamSelesai(row.jam_selesai || row.jam_akhir || "");
-    }
-    setError({});
-  };
 
   /* =====================================================
      GET DATA KELAS

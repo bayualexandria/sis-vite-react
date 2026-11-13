@@ -28,6 +28,15 @@ import CalonSiswa from "./pages/calonsiswa/CalonSiswa";
 import DashboardPPDB from "./pages/ppdb/pages/DashboardPPDB";
 import { WebsitePPDB } from "./pages/ppdb/WebsitePPDB";
 import GetCalonSiswaByUsername from "./pages/calonsiswa/GetCalonSiswaByUsername";
+import {
+  GuruPage,
+  Fasilitas,
+  Berita,
+  ProfileSekolah,
+  Jurusan,
+  Kontak,
+  Prestasi,
+} from "./pages/web/Index";
 
 // Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
 const ROLES = {
@@ -40,6 +49,13 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Website />} />
+      <Route path="/tenaga-pengajar" element={<GuruPage />} />
+      <Route path="/fasilitas" element={<Fasilitas />} />
+      <Route path="/berita" element={<Berita />} />
+      <Route path="/jurusan" element={<Jurusan />} />
+      <Route path="/kontak" element={<Kontak />} />
+      <Route path="/prestasi" element={<Prestasi />} />
+      <Route path="/profil" element={<ProfileSekolah />} />
       <Route path="/ppdb" element={<WebsitePPDB />} />
       <Route
         path="/ppdb/login"

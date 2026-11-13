@@ -58,7 +58,7 @@ function DeleteGuruById({ username, dataGuru }) {
             }, 500);
           }
         } catch (e) {
-          console.log(e.message);
+          console.error(e);
         }
         return true;
       });

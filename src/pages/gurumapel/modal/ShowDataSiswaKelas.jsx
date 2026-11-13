@@ -5,7 +5,6 @@ import DataTable from "react-data-table-component";
 import api from "../../../utils/repositories";
 
 function ShowDataSiswaKelas({ opt }) {
-  console.log(opt);
   const [isOpen, setIsOpen] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -58,17 +57,14 @@ function ShowDataSiswaKelas({ opt }) {
       const response = await api.get(
         `siswa-kelas/${opt.nip_wali_kelas}/${opt.id}`,
       );
-      console.log("shiw data siswi", response);
 
       const data = Array.isArray(response?.data)
         ? response.data
         : (response?.data?.data ?? []);
-      console.log(response);
 
       setSiswa(data);
     } catch (error) {
       console.error("Gagal mengambil data siswa:", error);
-      console.log(error);
       setSiswa([]);
     } finally {
       setPendingData(false);

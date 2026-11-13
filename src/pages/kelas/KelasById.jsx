@@ -27,7 +27,6 @@ function KelasById() {
   const getDataKelasById = useCallback(async () => {
     try {
       const response = await api.get(`ruang-kelas/${id}`);
-      console.log("kelasbyid", response);
 
       const data = response?.data?.data ?? [];
 
@@ -60,7 +59,6 @@ function KelasById() {
       setPendingData(true);
 
       const response = await api.get(`siswa-kelas/${nip}/${kelasid}`);
-      console.log("data siswa kelas", response);
 
       const data = Array.isArray(response?.data)
         ? response.data
@@ -69,7 +67,7 @@ function KelasById() {
       setSiswaByKelas(data);
     } catch (error) {
       console.error("Gagal mengambil data siswa:", error);
-      console.log(error.response);
+
       setSiswaByKelas([]);
     } finally {
       setPendingData(false);

@@ -109,7 +109,6 @@ function ChangePassword() {
         rawUsername.replace(/['"]+/g, "").trim(),
       );
 
-      console.log("Username bersih untuk URL:", username);
       const response = await api.put(
         `user/change-password/${username}`,
         formData,

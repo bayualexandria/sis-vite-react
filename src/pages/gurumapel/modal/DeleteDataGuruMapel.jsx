@@ -55,7 +55,6 @@ function DeleteDataGuruMapel({ id, dataGuruMapel }) {
             setTimeout(() => dataGuruMapel(), 3000);
           }
         } catch (e) {
-          console.log(e.response);
           if (e.response.data.status == 400) {
             templateModalSuccess.fire({
               icon: "error",

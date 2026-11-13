@@ -258,6 +258,18 @@ const getDataTableStyles = (isDarkMode) => ({
   },
 });
 
+// Helper untuk menentukan badge warna status yang lebih soft & profesional
+const getBadgeStyle = (statusName) => {
+  switch (statusName) {
+    case "Pending":
+      return "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100";
+    case "Diverifikasi":
+      return "bg-green-50 text-green-700 border-green-200 hover:bg-green-100";
+    default:
+      return "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100";
+  }
+};
+
 /* =========================================================
    CALON SISWA
 ========================================================= */
@@ -322,7 +334,6 @@ function CalonSiswa() {
 
       // Mengubah endpoint API menjadi /siswa-ppdb
       const response = await api.get("siswa-ppdb/");
-      console.log("Data siswa PPDB:", response?.data);
 
       const data = response?.data?.data ?? [];
 
@@ -527,6 +538,19 @@ function CalonSiswa() {
       },
 
       {
+        name: "Status",
+        cell: (row) => (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium border transition shadow-xs cursor-pointer flex items-center gap-1.5 ${getBadgeStyle(row.status)}`}
+          >
+            {row?.status ?? "-"}
+          </span>
+        ),
+        sortable: true,
+        width: "150px",
+      },
+
+      {
         name: "Aksi",
 
         cell: (row) => (
@@ -534,7 +558,7 @@ function CalonSiswa() {
             {/* EDIT */}
 
             <Link
-              to={`/siswa-ppdb/${row?.no_registrasi }`}
+              to={`/siswa-ppdb/${row?.no_registrasi}`}
               title="Edit data siswa"
               className="
                 group flex h-8 w-8 items-center justify-center

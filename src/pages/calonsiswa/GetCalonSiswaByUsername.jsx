@@ -163,7 +163,6 @@ function GetCalonSiswaByUsername() {
     try {
       setLoading(true);
       const response = await api.get(`siswa-ppdb/${username}`);
-      console.log(response);
       const data = response?.data?.data;
       setSiswa(data || null);
     } catch (error) {

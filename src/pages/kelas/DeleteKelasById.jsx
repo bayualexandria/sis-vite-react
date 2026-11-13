@@ -5,7 +5,7 @@ import api from "../../utils/repositories";
 function DeleteKelasById({ id, getKelasHistory }) {
   // Delete data kelas
   const deleteDataKelas = async () => {
-    console.log(id);
+
     const templateModalSuccess = withReactContent(Swal).mixin({
       customClass: {
         confirmButton:
@@ -55,7 +55,7 @@ function DeleteKelasById({ id, getKelasHistory }) {
             setTimeout(() => getKelasHistory(), 3000);
           }
         } catch (error) {
-          console.log(error.response);
+
           if (error.response.data.status == 400) {
             templateModalSuccess.fire({
               icon: "error",

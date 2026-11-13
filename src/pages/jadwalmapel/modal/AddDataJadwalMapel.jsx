@@ -255,7 +255,7 @@ function AddDataJadwalMapel({ guruMapel, jadwalMapel }) {
   const [jamSelesai, setJamSelesai] = useState("");
 
   const [error, setError] = useState({});
-  console.log("add data", guruMapel);
+
 
   /* =====================================================
      OPEN / CLOSE
@@ -340,8 +340,6 @@ function AddDataJadwalMapel({ guruMapel, jadwalMapel }) {
     formData.append("hari", hari);
     formData.append("jam_mulai", jamMulai);
     formData.append("jam_selesai", jamSelesai);
-
-    console.log(kelasID);
 
     try {
       const response = await api

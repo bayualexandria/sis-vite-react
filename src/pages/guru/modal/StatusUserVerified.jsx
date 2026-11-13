@@ -22,7 +22,6 @@ const templateModalSuccess = withReactContent(Swal).mixin({
 });
 
 function StatusUserVerified({ row, dataGuru }) {
-  console.log("status", row.email_verified_at);
   const updateEmailVerifiedAtToNull = async () => {
     try {
       let response = await api
@@ -45,7 +44,6 @@ function StatusUserVerified({ row, dataGuru }) {
       let response = await api
         .get(`user/${row.nip}/update-email-verified-at`)
         .then((res) => res.data);
-      console.log(response);
       if (response.status === 200) {
         templateModalSuccess.fire({
           icon: "success",

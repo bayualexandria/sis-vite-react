@@ -63,7 +63,6 @@ function ShowDataSiswa({ kelasId, waliKelasId }) {
       const data = Array.isArray(response?.data)
         ? response.data
         : (response?.data?.data ?? []);
-      console.log(response);
 
       setSiswa(data);
     } catch (error) {

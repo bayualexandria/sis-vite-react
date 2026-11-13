@@ -87,7 +87,6 @@ function ForgetPassword() {
 
       const responseData = response?.data;
 
-      console.log("Forgot password response:", responseData);
 
       if (response?.status === 503 || responseData?.status === 503) {
         toast.fire({

@@ -56,7 +56,7 @@ export default function LoginPPDB() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({});
-
+  
   const [user, setUser] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -64,19 +64,16 @@ export default function LoginPPDB() {
     setIsLoading(true);
 
     try {
-      let response = await api.post("auth/ppdb/login", {
+      await api.post("auth/ppdb/login", {
         username: email,
         password: password,
       });
 
       setIsLoading(false);
-      console.log("Login response:", response.data);
       localStorage.setItem("is_logged_in_ppdb", "true");
       localStorage.setItem("username", JSON.stringify(email.trim()));
       setUser(true);
     } catch (error) {
-      console.log("Login error:", error.response.data);
-
       if (error.response.data.status === 401) {
         setIsLoading(false);
         setError(error.response.data.message || "Email atau kata sandi salah.");
@@ -142,6 +139,7 @@ export default function LoginPPDB() {
 
         {/* Floating Animated Badge Icons di Sisi Kiri */}
         {/* Icon 1: Dokumen / Berkas */}
+       
         <motion.div
           animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
@@ -250,6 +248,7 @@ export default function LoginPPDB() {
 
         {/* Footer info */}
         <div className="z-10 text-xs text-blue-300/70">
+        
           &copy; 2026 Panitia PPDB Nasional. All rights reserved.
         </div>
       </motion.div>
@@ -280,6 +279,7 @@ export default function LoginPPDB() {
             <p className="text-sm text-slate-500">
               Masukkan no. registrasi dan kata sandi akun calon siswa Anda.
             </p>
+            
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">

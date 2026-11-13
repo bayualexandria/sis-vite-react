@@ -59,7 +59,6 @@ const getValidationErrors = (response) => {
 };
 
 function UpdateGuruMapel({ id, dataGuruMapel }) {
-  console.log(id);
   const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -125,7 +124,6 @@ function UpdateGuruMapel({ id, dataGuruMapel }) {
         );
         return;
       }
-      console.log("updated data", resDetail);
 
       if (resDetail?.status === 200) {
         const detailData = resDetail?.data;
@@ -183,7 +181,6 @@ function UpdateGuruMapel({ id, dataGuruMapel }) {
     const formData = new FormData();
     formData.append("mata_pelajaran_id", mapelID);
     formData.append("guru_id", waliKelas);
-    console.log(waliKelas + mapelID);
 
     try {
       const response = await api
@@ -222,7 +219,6 @@ function UpdateGuruMapel({ id, dataGuruMapel }) {
       );
       setLoading(false);
     } catch (error) {
-      console.log(error.response);
       console.error("Gagal memperbarui data guru mapel:", error);
       setLoading(false);
 

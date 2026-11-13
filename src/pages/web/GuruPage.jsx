@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "./components/NavbarSection";
 import Footer from "./components/FooterSection";
-<<<<<<< HEAD
 import FloatingChatAI from "./components/FloatingChatAI";
-=======
-import FloatingChatAI from "./components/FloatingChatAI"; // <-- Import Chat AI
->>>>>>> 288fe97 (Updated)
+
 import repo from "../../utils/repo";
 import api from "../../utils/repositories";
 import repoimages from "../../utils/repoimages";
@@ -16,10 +13,7 @@ export default function GuruPage() {
   const [sekolah, setSekolah] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState("semua");
-=======
->>>>>>> 288fe97 (Updated)
   const [selectedGuru, setSelectedGuru] = useState(null);
 
   useEffect(() => {
@@ -29,12 +23,10 @@ export default function GuruPage() {
           axios.get(`${repo}api/profile-sekolah`),
           api.get("/guru/"),
         ]);
-<<<<<<< HEAD
 
         const dataGuruMentah = resGuru.data?.data || resGuru.data || [];
-        console.log(dataGuruMentah);
 
-        // Fungsi helper bobot hierarki
+        // Fungsi helper bobot hierarki jabatan
         const getHierarkiBobot = (guru) => {
           const jabatan = (
             guru.status_guru ||
@@ -63,11 +55,6 @@ export default function GuruPage() {
 
         setSekolah(resSekolah.data?.data || null);
         setListGuru(dataGuruTerurut);
-=======
-        console.log(resGuru);
-        setSekolah(resSekolah.data?.data || null);
-        setListGuru(resGuru.data?.data || resGuru.data || []);
->>>>>>> 288fe97 (Updated)
       } catch (error) {
         console.error("Gagal memuat data:", error);
       } finally {
@@ -77,7 +64,6 @@ export default function GuruPage() {
     fetchData();
   }, []);
 
-<<<<<<< HEAD
   // Pisahkan Pimpinan Utama untuk ditaruh di section khusus atas
   const pimpinanUtama = listGuru.filter((guru) => {
     const jabatan = (guru.status_guru || guru.position || "").toLowerCase();
@@ -362,111 +348,10 @@ export default function GuruPage() {
 
               <div className="flex items-center gap-5">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white/10 p-1 shadow-inner backdrop-blur-md ring-2 ring-white/20">
-=======
-  const filteredGuru = listGuru.filter((guru) => {
-    const query = searchQuery.toLowerCase();
-    const nama = (guru.nama || guru.name || "").toLowerCase();
-    const mapel = (
-      guru.mapel ||
-      guru.subject ||
-      guru.bidang ||
-      ""
-    ).toLowerCase();
-    const jabatan = (guru.status_guru || guru.position || "").toLowerCase();
-    return (
-      nama.includes(query) || mapel.includes(query) || jabatan.includes(query)
-    );
-  });
-
-  return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-800">
-      <Navbar sekolah={sekolah} repo={repo} isDetailPage={true} />
-
-      {/* Header Halaman */}
-      <div className="bg-gradient-to-b from-blue-900 to-indigo-900 py-16 text-white">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <span className="text-xs font-bold tracking-[0.2em] text-blue-300 sm:text-sm">
-            DOKUMEN PENDIDIK
-          </span>
-          <h1 className="mt-3 text-3xl font-black sm:text-5xl">
-            Tenaga Pengajar & Staff
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-blue-100 sm:text-base">
-            Mengenal lebih dekat para guru dan staf profesional yang membimbing
-            serta mendampingi siswa.
-          </p>
-          <div className="mx-auto mt-8 max-w-md">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama guru, mata pelajaran, atau jabatan..."
-              className="w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-3.5 text-sm text-white backdrop-blur transition placeholder:text-blue-200 focus:bg-white focus:text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-400/30"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Content Grid */}
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-16 sm:px-6 lg:px-8 w-full">
-        {loading ? (
-          <div className="py-20 text-center text-slate-500">
-            Memuat data tenaga pengajar...
-          </div>
-        ) : filteredGuru.length === 0 ? (
-          <div className="py-20 text-center text-slate-500">
-            Tidak ada guru yang ditemukan.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {filteredGuru.map((guru, index) => (
-              <div
-                key={guru.id || index}
-                onClick={() => setSelectedGuru(guru)}
-                className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition duration-300 hover:-translate-y-1.5 hover:border-blue-300 hover:shadow-xl"
-              >
-                <div className="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-blue-100 text-3xl font-black text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
-                  {guru.image_profile || guru.image ? (
-                    <img
-                      src={`${repoimages}${guru.image_profile || guru.image}`}
-                      alt={guru.nama || guru.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    (guru.nama || guru.name || "G").charAt(0)
-                  )}
-                </div>
-                <h3 className="mt-5 font-bold text-slate-900 transition group-hover:text-blue-600">
-                  {guru.nama || guru.name}
-                </h3>
-                <p className="mt-1 text-xs font-semibold text-blue-600">
-                  {guru.status_guru || guru.position || "Guru Pengajar"}
-                </p>
-                <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-500">
-                  {guru.mapel || guru.subject || guru.bidang}
-                </p>
-                <span className="mt-4 inline-block text-xs font-bold text-slate-400 group-hover:text-blue-600">
-                  Lihat Detail Profil →
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-
-      {/* Modal Detail Guru */}
-      {selectedGuru && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-blue-600 text-2xl font-black text-white shadow-lg">
->>>>>>> 288fe97 (Updated)
                   {selectedGuru.image_profile || selectedGuru.image ? (
                     <img
                       src={`${repoimages}${selectedGuru.image_profile || selectedGuru.image}`}
-                      alt="Foto"
-<<<<<<< HEAD
+                      alt={selectedGuru.nama || selectedGuru.name}
                       className="h-full w-full rounded-xl object-cover"
                     />
                   ) : (
@@ -480,30 +365,15 @@ export default function GuruPage() {
 
                 <div className="space-y-1 pr-6">
                   <span className="inline-block rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-bold text-blue-300 ring-1 ring-inset ring-blue-400/30">
-=======
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    (selectedGuru.nama || selectedGuru.name || "G").charAt(0)
-                  )}
-                </div>
-                <div>
-                  <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
->>>>>>> 288fe97 (Updated)
                     {selectedGuru.status_guru ||
                       selectedGuru.position ||
                       "Guru Pengajar"}
                   </span>
-<<<<<<< HEAD
                   <h3 className="text-xl font-extrabold tracking-tight text-white">
-=======
-                  <h3 className="mt-1 text-xl font-black text-slate-900">
->>>>>>> 288fe97 (Updated)
                     {selectedGuru.nama || selectedGuru.name}
                   </h3>
                 </div>
               </div>
-<<<<<<< HEAD
             </div>
 
             {/* Modal Body dengan Desain Clean Card */}
@@ -545,47 +415,6 @@ export default function GuruPage() {
                 className="w-full rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition hover:bg-blue-600"
               >
                 Tutup Profil
-=======
-              <button
-                onClick={() => setSelectedGuru(null)}
-                className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-100"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="mt-6 space-y-4 border-t border-slate-100 pt-6 text-sm text-slate-600">
-              <div>
-                <strong className="block text-xs uppercase tracking-wider text-slate-400">
-                  Mapel
-                </strong>
-                <p className="mt-1 font-semibold text-slate-800">
-                  {selectedGuru.mapel || selectedGuru.subject || "-"}
-                </p>
-              </div>
-              <div>
-                <strong className="block text-xs uppercase tracking-wider text-slate-400">
-                  Pendidikan
-                </strong>
-                <p className="mt-1 font-semibold text-slate-800">
-                  {selectedGuru.pendidikan || selectedGuru.education || "-"}
-                </p>
-              </div>
-              <div>
-                <strong className="block text-xs uppercase tracking-wider text-slate-400">
-                  Biografi
-                </strong>
-                <p className="mt-1 leading-6">
-                  {selectedGuru.bio || selectedGuru.description || "-"}
-                </p>
-              </div>
-            </div>
-            <div className="mt-8">
-              <button
-                onClick={() => setSelectedGuru(null)}
-                className="w-full rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg"
-              >
-                Tutup
->>>>>>> 288fe97 (Updated)
               </button>
             </div>
           </div>

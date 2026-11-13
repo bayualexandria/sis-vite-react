@@ -292,7 +292,6 @@ export default function App() {
       // ketika mendeteksi objek instance FormData()
       let response = await api.post(`auth/ppdb/register`, dataForm);
       setIsLoading(false);
-      console.log("Response:", response.data);
 
       // SweetAlert2 Tampilan Berhasil
       toast.fire({

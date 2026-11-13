@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Main from "./components/Main";
 import api from "../../../utils/repositories";
+import repo from "../../../utils/repo";
 
 export default function FormulirPPDB() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -272,7 +273,6 @@ export default function FormulirPPDB() {
         );
       }
     } catch (error) {
-      console.log("Error submitting form:", error.response);
       const errRes = error.response?.data;
 
       if (errRes && typeof errRes.message === "object") {
@@ -310,7 +310,7 @@ export default function FormulirPPDB() {
       return normalizedPath;
     }
 
-    const rawBaseUrl = api.defaults.baseURL || "http://localhost:8000/";
+    const rawBaseUrl = api.defaults.baseURL || repo;
     const cleanBaseUrl = rawBaseUrl.replace(/\/api\/?$/, "");
 
     return `${cleanBaseUrl.replace(/\/$/, "")}/${normalizedPath.replace(/^\//, "")}`;
@@ -380,13 +380,13 @@ export default function FormulirPPDB() {
             }));
           }
         } catch (docErr) {
-          console.log("Gagal memuat dokumen persyaratan:", docErr);
+          console.error("Gagal memuat dokumen persyaratan:", docErr);
         }
 
         setIsSuccess(true);
       }
     } catch (error) {
-      console.log("Belum ada data pendaftaran:", error.response?.status);
+      console.error("Belum ada data pendaftaran:", error);
       setIsSuccess(false);
     }
   }, [username]);

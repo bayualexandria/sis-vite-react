@@ -293,7 +293,7 @@ function AddDataKelas({ getKelasHistory }) {
   const getDataGuru = async () => {
     try {
       const response = await api.get("guru/").then((res) => res.data);
-      console.log(response.data);
+    
 
       const allGuru = response?.data || [];
 
@@ -347,7 +347,7 @@ function AddDataKelas({ getKelasHistory }) {
     const formData = new FormData();
     formData.append("kelas_id", kelasID);
     formData.append("guru_wali_id", guruID);
-    console.log("add kelas", formData);
+
 
     try {
       const response = await api
@@ -389,7 +389,7 @@ function AddDataKelas({ getKelasHistory }) {
       }
     } catch (e) {
       console.error("Error save kelas:", e);
-      console.log(e.response);
+
 
       setLoading(false);
 

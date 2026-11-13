@@ -51,7 +51,7 @@ function GuruMapelById() {
         `jadwal-mapel/guru/${guruMapel.guru_id}/mapel/${guruMapel.mata_pelajaran_id}`,
       );
       const data = response?.data?.data ?? [];
-      console.log("jadwal mapel", data);
+  
       setListJadwalMapel(data);
 
       // Otomatis pilih kelas pertama jika data tersedia dan belum ada pilihan
@@ -61,7 +61,7 @@ function GuruMapelById() {
         setSelectedKelasId(String(firstKelasId));
       }
     } catch (error) {
-      console.log(error.response);
+
       console.error("Gagal mengambil data jadwal mapel:", error);
       setListJadwalMapel([]);
     } finally {

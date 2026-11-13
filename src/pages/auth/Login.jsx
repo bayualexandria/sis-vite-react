@@ -96,7 +96,6 @@ function Login() {
         },
       );
 
-      console.log("Login response:", response);
 
       if (response?.data?.status === 200) {
         localStorage.setItem("username", JSON.stringify(username.trim()));

@@ -15,8 +15,6 @@ const CARD_WIDTH_PX = 540;
 const CARD_HEIGHT_PX = 340;
 
 function KartuTandaSiswa({ siswa }) {
-  console.log(siswa);
-
   const [open, setOpen] = React.useState(false);
   const [isDownloading, setIsDownloading] = React.useState(false);
   const [sekolah, setSekolah] = React.useState("");
@@ -151,24 +149,10 @@ function KartuTandaSiswa({ siswa }) {
       const width = Math.ceil(rect.width);
       const height = Math.ceil(rect.height);
 
-      console.log("Ukuran kartu:", {
-        width,
-        height,
-      });
-
       // --------------------------------------------------------
       // Pastikan QR benar-benar ada
       // --------------------------------------------------------
-      const qrCanvas = element.querySelector('[data-qr-code="true"] canvas');
-
-      if (!qrCanvas) {
-        console.warn("QR Code canvas tidak ditemukan.");
-      } else {
-        console.log("QR Code:", {
-          width: qrCanvas.width,
-          height: qrCanvas.height,
-        });
-      }
+      element.querySelector('[data-qr-code="true"] canvas');
 
       // --------------------------------------------------------
       // HTML2CANVAS
@@ -559,12 +543,11 @@ function KartuTandaSiswa({ siswa }) {
                     <img
                       src={profileImage}
                       alt={siswa?.nama_siswa || "Siswa"}
-                      crossOrigin="anonymous"
                       className="
-                        h-full
-                        w-full
-                        object-cover
-                      "
+      h-full
+      w-full
+      object-cover
+    "
                     />
                   ) : (
                     String(siswa?.nama_siswa || "S")
@@ -726,12 +709,11 @@ function KartuTandaSiswa({ siswa }) {
                           <img
                             src={repo + sekolah.image_profile}
                             alt={sekolah?.nama_sekolah || "Siswa"}
-                            crossOrigin="anonymous"
                             className="
-                              h-full
-                              w-full
-                              object-cover
-                            "
+      h-full
+      w-full
+      object-cover
+    "
                           />
                         ) : (
                           <span
@@ -818,12 +800,11 @@ function KartuTandaSiswa({ siswa }) {
                         <img
                           src={profileImage}
                           alt={siswa?.nama_siswa || "Siswa"}
-                          crossOrigin="anonymous"
                           className="
-                            h-full
-                            w-full
-                            object-cover
-                          "
+      h-full
+      w-full
+      object-cover
+    "
                         />
                       ) : (
                         <span

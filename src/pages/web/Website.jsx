@@ -591,6 +591,96 @@ function Website() {
       </section>
 
       {/* =========================================================
+          MODAL DETAIL GURU / STAF
+      ========================================================== */}
+      {selectedGuru && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-lg transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all border border-slate-100">
+            {/* Header Modal */}
+            <div className="relative bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 p-6 text-white sm:p-8">
+              <button
+                onClick={() => setSelectedGuru(null)}
+                className="absolute top-5 right-5 rounded-full bg-white/10 p-2 text-white/70 backdrop-blur-md transition hover:bg-white/20 hover:text-white"
+              >
+                ✕
+              </button>
+
+              <div className="flex items-center gap-5">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white/10 p-1 shadow-inner backdrop-blur-md ring-2 ring-white/20">
+                  {selectedGuru.image_profile || selectedGuru.image ? (
+                    <img
+                      src={`${repoimages}${selectedGuru.image_profile || selectedGuru.image}`}
+                      alt={selectedGuru.nama || selectedGuru.name}
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-2xl font-black text-white">
+                      {(selectedGuru.nama || selectedGuru.name || "G").charAt(
+                        0,
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1 pr-6">
+                  <span className="inline-block rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-bold text-blue-300 ring-1 ring-inset ring-blue-400/30">
+                    {selectedGuru.status_guru ||
+                      selectedGuru.position ||
+                      "Guru Pengajar"}
+                  </span>
+                  <h3 className="text-xl font-extrabold tracking-tight text-white">
+                    {selectedGuru.nama || selectedGuru.name}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Body Modal */}
+            <div className="space-y-4 p-6 sm:p-8 bg-slate-50/50 max-h-[60vh] overflow-y-auto">
+              <div className="rounded-2xl bg-white p-4 border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  <span>📚</span> Mata Pelajaran / Bidang Keahlian
+                </div>
+                <p className="mt-1.5 text-sm font-bold text-slate-800">
+                  {selectedGuru.mapel || selectedGuru.subject || "-"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  <span>🎓</span> Pendidikan Terakhir
+                </div>
+                <p className="mt-1.5 text-sm font-bold text-slate-800">
+                  {selectedGuru.pendidikan || selectedGuru.education || "-"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-slate-100 shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  <span>📝</span> Biografi & Latar Belakang
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+                  {selectedGuru.bio ||
+                    selectedGuru.description ||
+                    "Belum ada informasi biografi yang ditambahkan untuk pengajar ini."}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div className="bg-white p-6 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => setSelectedGuru(null)}
+                className="w-full rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition hover:bg-blue-600"
+              >
+                Tutup Profil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
           FOOTER & FLOATING CHAT AI
       ========================================================== */}
       <FooterSection />

@@ -320,7 +320,6 @@ function GuruMapel() {
       const response = await api.get("guru-mapel/");
 
       const data = response?.data?.data ?? [];
-      console.log("guru mapel", data);
 
       setGuruMapel(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -364,9 +363,7 @@ function GuruMapel() {
       .trim()
       .toLowerCase();
 
-    // Debugging
-    console.log("--> ID User Bersih:", userIdStr);
-    console.log("--> Username Bersih:", usernameStr);
+  
 
     // Jika id_user == 3, filter berdasarkan NIP == username
     if (userIdStr === "3" || userIdStr === "2") {
@@ -377,7 +374,7 @@ function GuruMapel() {
           .toLowerCase();
         return itemNip === usernameStr;
       });
-      console.log("--> Data Setelah Difilter:", data);
+     
     }
 
     const keyword = search.trim().toLowerCase();

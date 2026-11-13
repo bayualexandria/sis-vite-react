@@ -9,7 +9,7 @@ import {
   Menu, // Ditambahkan untuk ikon tombol hamburger mobile
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation, Navigate } from "react-router-dom";
 import api from "../../../../utils/repositories";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -65,8 +65,11 @@ export default function Main({ children }) {
         withCredentials: true,
       });
       setUser(response.data.data);
-      console.log("User data fetched:", response.data.data);
     } catch (error) {
+      if (error.response.data.status == 401) {
+        localStorage.removeItem("is_logged_in_ppdb");
+        localStorage.removeItem("username");
+      }
       console.error("Error fetching user data:", error);
     } finally {
       setLoading(false);
@@ -106,7 +109,7 @@ export default function Main({ children }) {
         },
       );
     } catch (error) {
-      console.log("Logout API error:", error.response);
+      console.error("Logout API error:", error);
     } finally {
       localStorage.removeItem("username");
       localStorage.removeItem("is_logged_in_ppdb");
@@ -116,7 +119,9 @@ export default function Main({ children }) {
       });
     }
   };
-
+  if (!user) {
+    return <Navigate to="/ppdb/login" replace />;
+  }
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col lg:flex-row text-slate-800">
       {/* ================= 1. MOBILE NAVBAR (Header Atas Khusus Mobile) ================= */}

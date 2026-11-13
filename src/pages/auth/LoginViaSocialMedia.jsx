@@ -43,7 +43,6 @@ function LoginViaSocialMedia() {
         })
         .then((res) => res.data);
       setLoading(true);
-      console.log(response);
       setTimeout(() => {
         setLoading(false);
         if (response.status === 200) {

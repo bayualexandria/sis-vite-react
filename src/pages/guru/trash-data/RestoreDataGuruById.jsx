@@ -46,7 +46,7 @@ function RestoreDataGuruById({ nip, trashDataGuru, dataGuru }) {
       .then(async (result) => {
         if (result.isConfirmed) {
           try {
-            let response = await api.get(`/trash/guru/restore/${nip}`);
+            await api.get(`/trash/guru/restore/${nip}`);
             setTimeout(async () => {
               await templateModalSuccess.fire({
                 icon: "success",
@@ -57,9 +57,7 @@ function RestoreDataGuruById({ nip, trashDataGuru, dataGuru }) {
                 await dataGuru();
               }
             }, 500);
-            console.log(response);
           } catch (e) {
-            console.log(e.response);
             return e;
           }
         }
