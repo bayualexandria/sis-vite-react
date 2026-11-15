@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Main from "./components/Main";
 import api from "../../../utils/repositories";
+import KartuUjianModal from "./KartuUjianPPDB";
 
 export default function DashboardPPDB() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function DashboardPPDB() {
   const [loading, setLoading] = useState(true);
   const [calonSiswa, setCalonSiswa] = useState({});
   const [pendaftaran, setPendaftaran] = useState({});
+  const [showKartuModal, setShowKartuModal] = useState(false);
 
   // ============================================================
   // USERNAME & FETCH DATA
@@ -475,9 +477,22 @@ export default function DashboardPPDB() {
                   Cetak kartu tanda peserta PPDB sebagai syarat mengikuti tes
                   seleksi offline/online.
                 </p>
-                <button className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md">
+                {/* 2. Update tombol Unduh Kartu Ujian */}
+                <button
+                  onClick={() => setShowKartuModal(true)}
+                  disabled={!hasDataSiswa}
+                  className={`w-full py-3 px-4 font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md ${
+                    hasDataSiswa
+                      ? "bg-slate-900 hover:bg-slate-800 text-white cursor-pointer"
+                      : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                  }`}
+                >
                   <Download className="w-4 h-4" />
-                  <span>Unduh Kartu Ujian (PDF)</span>
+                  <span>
+                    {hasDataSiswa
+                      ? "Unduh Kartu Ujian (PDF)"
+                      : "Lengkapi Biodata untuk Unduh"}
+                  </span>
                 </button>
               </div>
 
@@ -497,6 +512,14 @@ export default function DashboardPPDB() {
           </div>
         </main>
       </div>
+      <KartuUjianModal
+        isOpen={showKartuModal}
+        onClose={() => setShowKartuModal(false)}
+        user={user}
+        calonSiswa={calonSiswa}
+        pendaftaran={pendaftaran}
+        
+      />
     </Main>
   );
 }

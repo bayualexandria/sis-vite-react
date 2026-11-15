@@ -197,6 +197,18 @@ export default function FormulirPPDB() {
       if (!formData.pasFotoFile) {
         newErrors.pasFotoFile = "Pas Foto wajib diunggah.";
         isValid = false;
+      } else {
+        // Validasi ekstensi pas foto harus JPG / JPEG / PNG
+        const fileName =
+          typeof formData.pasFotoFile === "string"
+            ? formData.pasFotoFile
+            : formData.pasFotoFile.name || "";
+        const ext = fileName.split(".").pop().toLowerCase();
+        if (!["jpg", "jpeg", "png"].includes(ext)) {
+          newErrors.pasFotoFile =
+            "Format pas foto harus berupa JPG, JPEG, atau PNG.";
+          isValid = false;
+        }
       }
     }
 
@@ -1213,26 +1225,31 @@ export default function FormulirPPDB() {
                     {
                       name: "ijazahFile",
                       label: "Scan Ijazah / Surat Keterangan Lulus (PDF/JPG)",
+                      accept: ".pdf, .jpg, .jpeg, .png",
                       errorKey: errors.ijazahFile,
                     },
                     {
                       name: "kkFile",
                       label: "Scan Kartu Keluarga (PDF/JPG)",
+                      accept: ".pdf, .jpg, .jpeg, .png",
                       errorKey: errors.kkFile,
                     },
                     {
                       name: "aktaFile",
                       label: "Scan Akta Kelahiran (PDF/JPG)",
+                      accept: ".pdf, .jpg, .jpeg, .png",
                       errorKey: errors.aktaFile,
                     },
                     {
                       name: "ktpOrtuFile",
                       label: "Scan KTP Orang Tua (Ayah / Ibu) (PDF/JPG)",
+                      accept: ".pdf, .jpg, .jpeg, .png",
                       errorKey: errors.ktpOrtuFile,
                     },
                     {
                       name: "pasFotoFile",
-                      label: "Pas Foto Terbaru 3x4 (JPG/PNG)",
+                      label: "Pas Foto Terbaru 3x4 (Khusus JPG / PNG)",
+                      accept: ".jpg, .jpeg, .png",
                       errorKey: errors.pasFotoFile,
                     },
                   ].map((item, idx) => (
@@ -1250,7 +1267,7 @@ export default function FormulirPPDB() {
                         <input
                           type="file"
                           name={item.name}
-                          accept=".pdf, .jpg, .jpeg, .png"
+                          accept={item.accept}
                           onChange={handleChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
@@ -1259,7 +1276,9 @@ export default function FormulirPPDB() {
                           <span className="truncate">
                             {formData[item.name]
                               ? `File terpilih: ${getFileNameFromPath(formData[item.name])}`
-                              : "Klik atau tarik file ke sini (PDF / JPG / PNG)"}
+                              : item.name === "pasFotoFile"
+                                ? "Klik atau tarik file pas foto (JPG / PNG)"
+                                : "Klik atau tarik file ke sini (PDF / JPG / PNG)"}
                           </span>
                         </div>
 
