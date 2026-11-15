@@ -19,6 +19,7 @@ export default function DashboardPPDB() {
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const [calonSiswa, setCalonSiswa] = useState({});
+  const [pendaftaran, setPendaftaran] = useState({});
 
   // ============================================================
   // USERNAME & FETCH DATA
@@ -50,6 +51,23 @@ export default function DashboardPPDB() {
     }
   }, [navigate]);
 
+  const getPendaftaran = useCallback(async () => {
+    const username = getUsername();
+    if (!username) {
+      setLoading(false);
+      navigate("/ppdb/login", { replace: true });
+      return;
+    }
+    try {
+      let response = await api.get(`ppdb/pendaftaran/${username}`, {
+        withCredentials: true,
+      });
+      setPendaftaran(response.data.data || {});
+    } catch (error) {
+      console.error("Error fetching pendaftaran data:", error);
+    }
+  }, [navigate]);
+
   const getDataCalonSiswa = useCallback(async () => {
     const username = getUsername();
     if (!username) {
@@ -73,25 +91,81 @@ export default function DashboardPPDB() {
   useEffect(() => {
     getDataCalonSiswa();
     getUserData();
-  }, [getUserData, getDataCalonSiswa]);
+    getPendaftaran();
+  }, [getUserData, getDataCalonSiswa, getPendaftaran]);
 
   // ============================================================
-  // LOGIKA STATUS DINAMIS BERDASARKAN DATA `calonSiswa`
+  // LOGIKA STATUS DINAMIS BERDASARKAN DATA
   // ============================================================
 
-  // Cek apakah data calon siswa sudah ada (objek tidak kosong)
   const hasDataSiswa = Boolean(
     calonSiswa &&
     typeof calonSiswa === "object" &&
     Object.keys(calonSiswa).length > 0,
   );
 
-  // Status berkas dari backend (misal: "Verifikasi Berkas", "Diterima", "Pending", dll)
+  const hasPendaftaran = Boolean(
+    pendaftaran &&
+    typeof pendaftaran === "object" &&
+    Object.keys(pendaftaran).length > 0,
+  );
+
   const statusBerkasBackend = (
     calonSiswa.status_berkas ||
     calonSiswa.status ||
     ""
   ).toLowerCase();
+
+  // Konfigurasi status verifikasi berdasarkan pendaftaran & keberadaan datanya
+  const getVerificationConfig = () => {
+    // Jika data pendaftaran tidak ada / kosong
+    if (!hasPendaftaran) {
+      return {
+        text: "Mohon untuk mengisi formulir biodata dan berkas",
+        badgeClass: "bg-amber-100 text-amber-800",
+        iconBgClass: "bg-amber-50 text-amber-600",
+        IconComponent: AlertCircle,
+        description: "Silakan lengkapi data mandiri Anda terlebih dahulu.",
+      };
+    }
+
+    const statusVerifikasi = pendaftaran?.status_verifikasi || "Pending";
+
+    let badgeClass = "bg-amber-100 text-amber-800";
+    let iconBgClass = "bg-amber-50 text-amber-600";
+    let IconComponent = Clock;
+
+    if (statusVerifikasi === "Diverifikasi") {
+      badgeClass = "bg-emerald-100 text-emerald-800";
+      iconBgClass = "bg-emerald-50 text-emerald-600";
+      IconComponent = CheckCircle2;
+    } else if (statusVerifikasi === "Ditolak") {
+      badgeClass = "bg-rose-100 text-rose-800";
+      iconBgClass = "bg-rose-50 text-rose-600";
+      IconComponent = AlertCircle;
+    }
+
+    return {
+      text: statusVerifikasi,
+      badgeClass: badgeClass,
+      iconBgClass: iconBgClass,
+      IconComponent: IconComponent,
+      description: pendaftaran?.catatan_verifikasi
+        ? `Catatan: ${pendaftaran.catatan_verifikasi}`
+        : "Berkas sedang ditinjau oleh panitia seleksi daerah.",
+    };
+  };
+
+  const verificationConfig = getVerificationConfig();
+
+  // Helper untuk mengecek apakah Verifikasi Berkas Panitia sudah selesai (completed)
+  const isVerifikasiPanitiaCompleted =
+    hasDataSiswa &&
+    (pendaftaran?.status_verifikasi === "Diverifikasi" ||
+      statusBerkasBackend.includes("diterima") ||
+      statusBerkasBackend.includes("selesai") ||
+      statusBerkasBackend.includes("verified") ||
+      calonSiswa.verifikasi_panitia_status === "completed");
 
   const getStepStatus = (stepName) => {
     if (stepName === "Pendaftaran Akun") {
@@ -99,36 +173,37 @@ export default function DashboardPPDB() {
     }
 
     if (stepName === "Pengisian Biodata & Berkas") {
-      // Jika data siswa sudah ada dari API, otomatis completed
       return hasDataSiswa ? "completed" : "current";
     }
 
     if (stepName === "Verifikasi Berkas Panitia") {
       if (!hasDataSiswa) return "upcoming";
-      // Jika status backend sudah selesai/diterima/verified
-      if (
-        statusBerkasBackend.includes("diterima") ||
-        statusBerkasBackend.includes("selesai") ||
-        statusBerkasBackend.includes("verified") ||
-        calonSiswa.verifikasi_panitia_status === "completed"
-      ) {
+      if (isVerifikasiPanitiaCompleted) {
         return "completed";
       }
-      return "current"; // Masih dalam tahap verifikasi
+      return "current";
     }
 
     if (stepName === "Tes Seleksi / Wawancara") {
-      if (!hasDataSiswa) return "upcoming";
+      if (!isVerifikasiPanitiaCompleted) return "upcoming";
+
       if (
         statusBerkasBackend.includes("lulus tes") ||
         statusBerkasBackend.includes("wawancara selesai")
       ) {
         return "completed";
       }
-      return statusBerkasBackend.includes("tes") ? "current" : "upcoming";
+
+      return "current";
     }
 
     if (stepName === "Pengumuman Hasil Akhir") {
+      const isTesSeleksiCompleted =
+        statusBerkasBackend.includes("lulus tes") ||
+        statusBerkasBackend.includes("wawancara selesai");
+
+      if (!isTesSeleksiCompleted) return "upcoming";
+
       if (
         statusBerkasBackend.includes("diterima") ||
         statusBerkasBackend.includes("lulus")
@@ -141,16 +216,11 @@ export default function DashboardPPDB() {
     return "upcoming";
   };
 
-  // Kalkulasi data statistik tampilan
   const studentData = {
     jalur: calonSiswa.jalur_pendaftaran || "Jalur Reguler / Prestasi",
-    status: hasDataSiswa
-      ? calonSiswa.status_berkas || "Verifikasi Berkas"
-      : "Belum Mengisi Biodata",
     progres: hasDataSiswa ? calonSiswa.progres || 65 : 30,
   };
 
-  // Tahapan Pendaftaran Dinamis
   const timelineSteps = [
     {
       title: "Pendaftaran Akun",
@@ -178,6 +248,8 @@ export default function DashboardPPDB() {
       date: "30 Mei 2026",
     },
   ];
+
+  const IconComponent = verificationConfig.IconComponent;
 
   return (
     <Main>
@@ -231,7 +303,7 @@ export default function DashboardPPDB() {
 
           {/* GRID KARTU STATISTIK & STATUS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Status Pendaftaran */}
+            {/* Status Pendaftaran / Verifikasi */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -242,18 +314,20 @@ export default function DashboardPPDB() {
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Status Berkas
                 </span>
-                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
-                  <Clock className="w-5 h-5" />
+                <div
+                  className={`p-2 rounded-xl ${verificationConfig.iconBgClass}`}
+                >
+                  <IconComponent className="w-5 h-5" />
                 </div>
               </div>
-              <div>
-                <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">
-                  {studentData.status}
+              <div className="space-y-2">
+                <span
+                  className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${verificationConfig.badgeClass}`}
+                >
+                  {verificationConfig.text}
                 </span>
-                <p className="text-xs text-slate-500 mt-2">
-                  {hasDataSiswa
-                    ? "Sedang ditinjau oleh panitia seleksi daerah."
-                    : "Menunggu pengisian data mandiri."}
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {verificationConfig.description}
                 </p>
               </div>
             </motion.div>
@@ -379,7 +453,9 @@ export default function DashboardPPDB() {
                           <p className="text-xs text-slate-500 mt-1 bg-blue-50/60 p-2.5 rounded-xl border border-blue-100">
                             {step.title === "Pengisian Biodata & Berkas"
                               ? "Silakan lengkapi formulir biodata dan berkas pendaftaran Anda."
-                              : "Berkas Anda sedang dalam proses verifikasi tim administratif."}
+                              : step.title === "Tes Seleksi / Wawancara"
+                                ? "Silakan bersiap untuk mengikuti tahapan tes seleksi atau wawancara."
+                                : "Berkas Anda sedang dalam proses verifikasi tim administratif."}
                           </p>
                         )}
                       </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import Main from "../../components/Main/Main";
 import api from "../../utils/repositories";
@@ -55,22 +55,6 @@ const Icons = {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M18 18.722a10.5 10.5 0 0 0-3.112-7.394M12 11.25a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Zm-9.75 9.75a15.02 15.02 0 0 1 12.375-6.187m3.375 2.437v4.5m-2.25-2.25h4.5"
-      />
-    </svg>
-  ),
-  Phone: ({ className = "h-4 w-4" }) => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.7"
-      stroke="currentColor"
-      className={className}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
       />
     </svg>
   ),
@@ -157,7 +141,14 @@ function GetCalonSiswaByUsername() {
   // State untuk modal dokumen
   const [selectedDoc, setSelectedDoc] = useState(null);
 
+  // State untuk modal verifikasi
+  const [isVerifModalOpen, setIsVerifModalOpen] = useState(false);
+  const [statusVerifikasi, setStatusVerifikasi] = useState("Pending");
+  const [catatanVerifikasi, setCatatanVerifikasi] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const { username } = useParams();
+  const navigate = useNavigate();
 
   const dataSiswaByUsername = useCallback(async () => {
     try {
@@ -189,6 +180,39 @@ function GetCalonSiswaByUsername() {
     dataSiswaByUsername();
     dataPersyaratanSiswaByUsername();
   }, [dataSiswaByUsername, dataPersyaratanSiswaByUsername]);
+
+  // Handler buka modal verifikasi
+  const handleOpenVerifModal = () => {
+    setStatusVerifikasi(
+      siswa?.status || siswa?.status_pendaftaran || "Pending",
+    );
+    setCatatanVerifikasi(siswa?.catatan_verifikasi || "");
+    setIsVerifModalOpen(true);
+  };
+
+  const formData = new FormData();
+  formData.append("status_verifikasi", statusVerifikasi);
+  formData.append("catatan_verifikasi", catatanVerifikasi);
+
+  // Handler Submit Verifikasi (API Patch & Redirect)
+  const handleUpdateVerifikasi = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+      await api.patch(`siswa-ppdb/pendaftaran/${username}`, formData);
+
+      setIsVerifModalOpen(false);
+      navigate("/siswa-ppdb");
+    } catch (error) {
+      console.log("Gagal mengupdate verifikasi:", error.response);
+      alert(
+        error.response?.data?.message ||
+          "Terjadi kesalahan saat mengupdate data.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Main>
@@ -256,14 +280,29 @@ function GetCalonSiswaByUsername() {
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           (siswa.status || siswa.status_pendaftaran) ===
-                          "Diterima"
+                            "Diverifikasi" ||
+                          (siswa.status || siswa.status_pendaftaran) ===
+                            "Diterima"
                             ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
-                            : "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
+                            : (siswa.status || siswa.status_pendaftaran) ===
+                                "Ditolak"
+                              ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400"
+                              : "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
                         }`}
                       >
                         Status:{" "}
                         {siswa.status || siswa.status_pendaftaran || "Pending"}
                       </span>
+                    </div>
+
+                    {/* Tombol Verifikasi */}
+                    <div className="mt-4">
+                      <button
+                        onClick={handleOpenVerifModal}
+                        className="w-full rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-700"
+                      >
+                        Verifikasi Pendaftaran
+                      </button>
                     </div>
                   </div>
 
@@ -278,8 +317,8 @@ function GetCalonSiswaByUsername() {
                       <span className="text-slate-400">Tempat, Tgl Lahir:</span>
                       <span className="font-semibold">
                         {siswa.calon_siswa?.ttl
-                          ? `${siswa.calon_siswa.ttl}, `
-                          : ""}
+                          ? `${siswa.calon_siswa.ttl}`
+                          : "-"}
                       </span>
                     </div>
                   </div>
@@ -395,25 +434,24 @@ function GetCalonSiswaByUsername() {
                           "-"}
                       </span>
                     </div>
-                    {siswa.orang_tua.nama_wali ?? (
+
+                    {siswa.orang_tua?.nama_wali && (
                       <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
                         <span className="text-slate-400 block mb-1">
                           Nama Wali
                         </span>
                         <span className="font-semibold text-slate-800 dark:text-white">
-                          {siswa.orang_tua?.nama_wali || siswa.nama_wali || "-"}
+                          {siswa.orang_tua.nama_wali}
                         </span>
                       </div>
                     )}
-                    {siswa.orang_tua.pekerjaan_wali ?? (
+                    {siswa.orang_tua?.pekerjaan_wali && (
                       <div className="rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
                         <span className="text-slate-400 block mb-1">
                           Pekerjaan Wali
                         </span>
                         <span className="font-semibold text-slate-800 dark:text-white">
-                          {siswa.orang_tua?.pekerjaan_wali ||
-                            siswa.pekerjaan_ibu ||
-                            "-"}
+                          {siswa.orang_tua.pekerjaan_wali}
                         </span>
                       </div>
                     )}
@@ -496,7 +534,6 @@ function GetCalonSiswaByUsername() {
                                 </div>
                               </div>
 
-                              {/* Tombol Lihat Dokumen (Memicu Modal) */}
                               {fullFileUrl ? (
                                 <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex justify-end">
                                   <button
@@ -539,7 +576,6 @@ function GetCalonSiswaByUsername() {
           {selectedDoc && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
               <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden max-h-[90vh]">
-                {/* Modal Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                   <div>
                     <h3 className="font-bold text-slate-800 dark:text-white text-base">
@@ -551,13 +587,12 @@ function GetCalonSiswaByUsername() {
                   </div>
                   <button
                     onClick={() => setSelectedDoc(null)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-slate-600 dark:text-slate-300"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                   >
                     <Icons.Close className="h-5 w-5" />
                   </button>
                 </div>
 
-                {/* Modal Body / Viewer */}
                 <div className="flex-1 p-4 bg-slate-100 dark:bg-slate-950 overflow-auto flex flex-col items-center justify-center min-h-[450px]">
                   {selectedDoc.url.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
                     <img
@@ -572,33 +607,16 @@ function GetCalonSiswaByUsername() {
                         title={selectedDoc.name}
                         className="w-full h-[65vh] rounded-lg border border-slate-200 dark:border-slate-800 bg-white shadow-inner"
                       />
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Jika pratinjau PDF di atas tidak muncul, Anda dapat
-                        mengklik tombol{" "}
-                        <span className="font-semibold text-sky-600">
-                          "Buka di Tab Baru"
-                        </span>{" "}
-                        di bawah.
-                      </p>
                     </div>
                   ) : (
                     <div className="text-center py-12 space-y-3">
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                         Pratinjau langsung tidak tersedia untuk format file ini.
                       </p>
-                      <a
-                        href={selectedDoc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-700"
-                      >
-                        Unduh / Lihat Berkas
-                      </a>
                     </div>
                   )}
                 </div>
 
-                {/* Modal Footer */}
                 <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                   <a
                     href={selectedDoc.url}
@@ -615,6 +633,77 @@ function GetCalonSiswaByUsername() {
                     Tutup
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* =========================================================
+              MODAL FORM VERIFIKASI
+          ========================================================= */}
+          {isVerifModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+              <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                  <h3 className="font-bold text-slate-800 dark:text-white text-base">
+                    Form Verifikasi Pendaftaran
+                  </h3>
+                  <button
+                    onClick={() => setIsVerifModalOpen(false)}
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                  >
+                    <Icons.Close className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleUpdateVerifikasi}
+                  className="p-6 space-y-4 text-xs"
+                >
+                  <div>
+                    <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1.5">
+                      Status Verifikasi
+                    </label>
+                    <select
+                      value={statusVerifikasi}
+                      onChange={(e) => setStatusVerifikasi(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Diverifikasi">Diverifikasi</option>
+                      <option value="Ditolak">Ditolak</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-500 dark:text-slate-400 font-semibold mb-1.5">
+                      Catatan Verifikasi
+                    </label>
+                    <textarea
+                      rows="4"
+                      value={catatanVerifikasi}
+                      onChange={(e) => setCatatanVerifikasi(e.target.value)}
+                      placeholder="Masukkan catatan verifikasi..."
+                      className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => setIsVerifModalOpen(false)}
+                      className="rounded-xl bg-slate-200 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="rounded-xl bg-sky-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-sky-700 disabled:opacity-50"
+                    >
+                      {submitting ? "Menyimpan..." : "Simpan Perubahan"}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

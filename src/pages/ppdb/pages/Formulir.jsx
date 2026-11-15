@@ -274,6 +274,7 @@ export default function FormulirPPDB() {
       }
     } catch (error) {
       const errRes = error.response?.data;
+      console.log(error.response);
 
       if (errRes && typeof errRes.message === "object") {
         const messages = Object.values(errRes.message).join(", ");
