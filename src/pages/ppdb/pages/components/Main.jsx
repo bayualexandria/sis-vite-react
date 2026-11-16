@@ -194,7 +194,7 @@ export default function Main({ children }) {
                 {
                   name: "Pusat Bantuan",
                   icon: HelpCircle,
-                  to: "/ppdb/bantuan",
+                  to: "/ppdb/pusat-bantuan",
                 },
               ].map((item, idx) => {
                 const isActive = location.pathname === item.to;

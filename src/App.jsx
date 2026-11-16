@@ -37,6 +37,8 @@ import {
   Kontak,
   Prestasi,
 } from "./pages/web/Index";
+import PusatBantuan from "./pages/ppdb/pages/PusatBantuan";
+import StatusSeleksi from "./pages/ppdb/pages/StatusSeleksi";
 
 // Definisi Role (Ubah value/ID-nya sesuai dengan DB/LocalStorage Anda)
 const ROLES = {
@@ -78,6 +80,24 @@ function App() {
         element={
           <PrivateRoutePPDB>
             <DashboardPPDB />
+          </PrivateRoutePPDB>
+        }
+      />
+
+      <Route
+        path="/ppdb/pusat-bantuan"
+        element={
+          <PrivateRoutePPDB>
+            <PusatBantuan />
+          </PrivateRoutePPDB>
+        }
+      />
+
+      <Route
+        path="/ppdb/status"
+        element={
+          <PrivateRoutePPDB>
+            <StatusSeleksi />
           </PrivateRoutePPDB>
         }
       />
